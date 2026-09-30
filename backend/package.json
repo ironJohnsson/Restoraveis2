@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "test": "node --test tests/**/*.test.js",
+    "test": "node --test tests/topsis.test.js tests/api.test.js",
     "seed": "node src/database/seed.js"
   },
   "keywords": [
