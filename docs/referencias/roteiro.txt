@@ -1,0 +1,611 @@
+Roteiro - Plataforma Energia Renovável TOPSIS
+1. Contextualização 2. Requisitos 3. Stakeholders 4. Modelagem UML 5. Arquitetura 6. Banco de Dados 7. Método TOPSIS 8. Protótipos 9. Implementação 10. Testes 11. Qualidade ISO 12. Gerenciamento 13. Tecnologias 14. Avaliação
+O acesso à energia renovável constitui um dos pilares fundamentais para o desenvolvimento sustentável, conforme os Objetivos de Desenvolvimento Sustentável (ODS 7) da ONU. No Brasil, comunidades em situação de vulnerabilidade social frequentemente enfrentam barreiras no acesso a fontes limpas de energia.
+Objetivo Geral: Desenvolver uma plataforma computacional capaz de mensurar indicadores multicritério de vulnerabilidade social relacionados ao acesso, uso e impacto de fontes de energia renovável, utilizando o método TOPSIS.
+Objetivos Específicos:
+Identificar e catalogar indicadores de vulnerabilidade social energética;
+Implementar o método TOPSIS para ranqueamento de municípios/comunidades;
+Prover visualização georreferenciada dos resultados;
+Permitir análise comparativa entre unidades de análise;
+Gerar relatórios para subsidiar políticas públicas.
+Justificativa técnica (ISO/IEC 12207): O projeto segue os processos primários do ciclo de vida do software — aquisição, fornecimento, desenvolvimento, operação e manutenção — garantindo rastreabilidade desde a elicitação de requisitos até a implantação.
+Requisitos Funcionais
+ID
+Descrição
+Prioridade
+RF01
+Cadastrar municípios/comunidades com dados socioeconômicos
+Alta
+RF02
+Cadastrar indicadores e critérios de vulnerabilidade
+Alta
+RF03
+Configurar pesos dos critérios TOPSIS
+Alta
+RF04
+Executar cálculo TOPSIS e gerar ranking
+Alta
+RF05
+Visualizar resultados em dashboard com gráficos
+Média
+RF06
+Exportar relatórios em PDF/CSV
+Média
+RF07
+Visualização georreferenciada (mapa)
+Média
+RF08
+Gerenciar usuários e perfis de acesso
+Alta
+RF09
+Importar dados de fontes externas (IBGE, ANEEL)
+Baixa
+RF10
+Histórico de simulações TOPSIS
+Baixa
+Requisitos Não Funcionais
+ID
+Descrição
+Categoria ISO 25010
+RNF01
+Tempo de resposta do cálculo TOPSIS < 3s para 500 alternativas
+Eficiência de Desempenho
+RNF02
+Interface responsiva (desktop, tablet, mobile)
+Usabilidade
+RNF03
+Disponibilidade ≥ 99,5%
+Confiabilidade
+RNF04
+Autenticação via JWT com criptografia bcrypt
+Segurança
+RNF05
+Código com cobertura de testes ≥ 80%
+Manutenibilidade
+RNF06
+Documentação via Swagger/OpenAPI
+Portabilidade
+Stakeholder
+Papel
+Interesse
+Gestor Público
+Usuário primário
+Identificar comunidades vulneráveis para políticas públicas
+Pesquisador
+Usuário especialista
+Analisar correlações entre indicadores
+Comunidade
+Beneficiário
+Acesso a energia limpa e acessível
+Equipe de Desenvolvimento
+Produtor
+Entregar software funcional e documentado
+Professor orientador
+Validador
+Garantir rigor metodológico e acadêmico
+4.1 Diagrama de Casos de Uso (Textual)
+Atores: Administrador, Pesquisador, Gestor Público
+UC01 - Cadastrar Município
+Ator: Administrador
+Pré-condição: Usuário autenticado
+Fluxo principal:
+1. Ator seleciona "Novo Município"
+2. Sistema exibe formulário
+3. Ator preenche dados (nome, UF, população, IDH, etc.)
+4. Sistema valida e persiste
+5. Sistema confirma cadastro
+UC02 - Configurar Critérios TOPSIS
+Ator: Pesquisador
+Fluxo: Definir critérios, tipo (benefício/custo), pesos
+UC03 - Executar TOPSIS
+Ator: Pesquisador, Gestor
+Fluxo: Selecionar dataset → Executar → Visualizar ranking
+UC04 - Gerar Relatório
+Ator: Gestor Público
+Fluxo: Selecionar simulação → Exportar PDF/CSV
+4.2 Diagrama de Classes (Textual)
+┌─────────────────────┐     ┌──────────────────────┐
+│    Municipio        │     │     Criterio         │
+├─────────────────────┤     ├──────────────────────┤
+│ - id: int           │     │ - id: int            │
+│ - nome: string      │     │ - nome: string       │
+│ - uf: string        │     │ - tipo: enum(B,C)    │
+│ - populacao: int    │     │ - peso: float        │
+│ - coordenadas: geo  │     │ - unidade: string    │
+└─────────────────────┘     └──────────────────────┘
+│ 1..*                      │ 1..*
+▼                           ▼
+┌─────────────────────────────────────────────┐
+│           MatrizDecisao                     │
+├─────────────────────────────────────────────┤
+│ - municipio_id: FK                          │
+│ - criterio_id: FK                           │
+│ - valor: float                              │
+└─────────────────────────────────────────────┘
+│
+▼
+┌─────────────────────────────────────────────┐
+│          SimulacaoTOPSIS                    │
+├─────────────────────────────────────────────┤
+│ - id: int                                   │
+│ - data_execucao: datetime                   │
+│ - usuario_id: FK                            │
+│ - parametros: JSON                          │
+└─────────────────────────────────────────────┘
+│ 1..*
+▼
+┌─────────────────────────────────────────────┐
+│          ResultadoRanking                   │
+├─────────────────────────────────────────────┤
+│ - simulacao_id: FK                          │
+│ - municipio_id: FK                          │
+│ - coeficiente_proximidade: float            │
+│ - posicao_ranking: int                      │
+└─────────────────────────────────────────────┘
+4.3 Diagrama de Sequência — Executar TOPSIS
+Pesquisador → Frontend: Clica "Executar TOPSIS"
+Frontend → API: POST /api/topsis/executar {criterios, pesos}
+API → TopsisService: calcular(matriz, pesos)
+TopsisService → TopsisService: normalizar()
+TopsisService → TopsisService: calcularPonderada()
+TopsisService → TopsisService: idealPositiva()
+TopsisService → TopsisService: idealNegativa()
+TopsisService → TopsisService: distancias()
+TopsisService → TopsisService: coeficienteProximidade()
+TopsisService → DB: salvarSimulacao(resultado)
+DB → TopsisService: confirmação
+TopsisService → API: ranking[]
+API → Frontend: 200 OK {ranking, metadata}
+Frontend → Pesquisador: Exibe dashboard com ranking
+4.4 Diagrama de Atividades — Fluxo TOPSIS
+[Início]
+→ Selecionar alternativas (municípios)
+→ Selecionar critérios e pesos
+→ Montar matriz de decisão
+→ Normalizar matriz (norma vetorial)
+→ Aplicar pesos (matriz ponderada)
+→ Determinar solução ideal positiva (A+)
+→ Determinar solução ideal negativa (A-)
+→ Calcular distância Euclidiana a A+
+→ Calcular distância Euclidiana a A-
+→ Calcular coeficiente de proximidade (Ci)
+→ Ordenar por Ci (ranking)
+→ Exibir resultados
+[Fim]
+4.5 Diagrama de Componentes
+┌─────────────────────────────────────────────┐
+│              «subsystem»                    │
+│           Frontend (SPA)                    │
+│  ┌──────────┐ ┌──────────┐ ┌───────────┐  │
+│  │Dashboard │ │ Mapas    │ │ Formulários│  │
+│  └──────────┘ └──────────┘ └───────────┘  │
+└───────────────────┬─────────────────────────┘
+│ REST/JSON
+┌───────────────────▼─────────────────────────┐
+│              «subsystem»                    │
+│             Backend (API)                   │
+│  ┌──────────┐ ┌──────────┐ ┌───────────┐  │
+│  │AuthModule│ │TOPSISEngine│ │DataImport │  │
+│  └──────────┘ └──────────┘ └───────────┘  │
+└───────────────────┬─────────────────────────┘
+│ SQL
+┌───────────────────▼─────────────────────────┐
+│           PostgreSQL + PostGIS              │
+└─────────────────────────────────────────────┘
+4.6 Diagrama de Implantação
+┌─────────────┐    HTTPS    ┌─────────────────┐
+│   Cliente   │ ──────────► │  Nginx (Proxy)  │
+│  (Browser)  │             └────────┬────────┘
+└─────────────┘                      │
+┌─────────▼─────────┐
+│  App Server        │
+│  (Node.js/Python)  │
+└─────────┬─────────┘
+│
+┌─────────▼─────────┐
+│  PostgreSQL        │
+│  + PostGIS         │
+└───────────────────┘
+A arquitetura adota o padrão MVC em camadas, com separação clara entre apresentação, lógica de negócio e persistência, conforme recomendado pela ISO/IEC 12207 para manutenibilidade.
+┌────────────────────────────────────────┐
+│        Camada de Apresentação          │
+│   React/Vue.js + Leaflet + Chart.js    │
+├────────────────────────────────────────┤
+│        Camada de Aplicação (API)       │
+│   Controllers → Services → Repositories│
+├────────────────────────────────────────┤
+│        Camada de Domínio               │
+│   Entidades, Value Objects, TOPSIS     │
+├────────────────────────────────────────┤
+│        Camada de Infraestrutura        │
+│   ORM, Migrations, Cache, Filas       │
+└────────────────────────────────────────┘
+APIs RESTful — Endpoints Principais
+Método
+Endpoint
+Descrição
+GET
+/api/municipios
+Listar municípios
+POST
+/api/municipios
+Criar município
+GET
+/api/criterios
+Listar critérios
+POST
+/api/topsis/executar
+Executar cálculo TOPSIS
+GET
+/api/simulacoes/:id
+Obter resultado de simulação
+GET
+/api/relatorios/:id/pdf
+Exportar relatório
+-- Schema Principal
+CREATE TABLE municipios (
+id SERIAL PRIMARY KEY,
+nome VARCHAR(200) NOT NULL,
+uf CHAR(2) NOT NULL,
+populacao INTEGER,
+idh DECIMAL(4,3),
+coordenadas GEOMETRY(Point, 4326),
+created_at TIMESTAMP DEFAULT NOW()
+);
+CREATE TABLE criterios (
+id SERIAL PRIMARY KEY,
+nome VARCHAR(150) NOT NULL,
+descricao TEXT,
+tipo VARCHAR(10) CHECK (tipo IN ('beneficio','custo')),
+peso DECIMAL(5,4) DEFAULT 0.0,
+unidade VARCHAR(50)
+);
+CREATE TABLE matriz_decisao (
+id SERIAL PRIMARY KEY,
+municipio_id INTEGER REFERENCES municipios(id),
+criterio_id INTEGER REFERENCES criterios(id),
+valor DECIMAL(15,4) NOT NULL,
+ano_referencia INTEGER,
+UNIQUE(municipio_id, criterio_id, ano_referencia)
+);
+CREATE TABLE simulacoes (
+id SERIAL PRIMARY KEY,
+usuario_id INTEGER REFERENCES usuarios(id),
+data_execucao TIMESTAMP DEFAULT NOW(),
+parametros JSONB,
+status VARCHAR(20) DEFAULT 'concluida'
+);
+CREATE TABLE resultados_ranking (
+id SERIAL PRIMARY KEY,
+simulacao_id INTEGER REFERENCES simulacoes(id),
+municipio_id INTEGER REFERENCES municipios(id),
+coeficiente_ci DECIMAL(10,8),
+distancia_positiva DECIMAL(10,8),
+distancia_negativa DECIMAL(10,8),
+posicao INTEGER
+);
+7.1 Indicadores de Vulnerabilidade Social Energética
+Critério
+Indicador
+Tipo
+Fonte
+C1
+% domicílios sem acesso à eletricidade
+Custo
+IBGE
+C2
+Capacidade instalada solar (kW/hab)
+Benefício
+ANEEL
+C3
+Renda per capita
+Benefício
+IBGE
+C4
+Tarifa média de energia (R$/kWh)
+Custo
+ANEEL
+C5
+Índice de irradiação solar (kWh/m²/dia)
+Benefício
+INPE
+C6
+% população em extrema pobreza
+Custo
+IBGE
+C7
+Nº projetos de energia renovável ativos
+Benefício
+ANEEL
+7.2 Algoritmo TOPSIS — Implementação
+/**
+* Implementação TOPSIS em JavaScript/Python-like pseudocódigo
+*/
+function topsis(matriz, pesos, tipos) {
+// Passo 1: Normalização vetorial
+// r_ij = x_ij / sqrt(Σ x_ij²)
+const normalizada = normalizar(matriz);
+// Passo 2: Matriz ponderada
+// v_ij = w_j * r_ij
+const ponderada = normalizada.map((row, i) =>
+row.map((val, j) => val * pesos[j])
+);
+// Passo 3: Solução Ideal Positiva (A+)
+const Aplus = pesos.map((_, j) =>
+tipos[j] === 'beneficio'
+? Math.max(...ponderada.map(r => r[j]))
+: Math.min(...ponderada.map(r => r[j]))
+);
+// Passo 4: Solução Ideal Negativa (A-)
+const Aminus = pesos.map((_, j) =>
+tipos[j] === 'beneficio'
+? Math.min(...ponderada.map(r => r[j]))
+: Math.max(...ponderada.map(r => r[j]))
+);
+// Passo 5: Distâncias Euclidianas
+const Dplus = ponderada.map(row =>
+Math.sqrt(row.reduce((s, v, j) => s + (v - Aplus[j])**2, 0))
+);
+const Dminus = ponderada.map(row =>
+Math.sqrt(row.reduce((s, v, j) => s + (v - Aminus[j])**2, 0))
+);
+// Passo 6: Coeficiente de Proximidade
+// Ci = D- / (D+ + D-)
+const Ci = Dplus.map((dp, i) => Dminus[i] / (dp + Dminus[i]));
+// Passo 7: Ranking (maior Ci = menos vulnerável)
+return Ci.map((c, i) => ({ indice: i, ci: c }))
+.sort((a, b) => b.ci - a.ci);
+}
+7.3 Exemplo Numérico
+Município
+C1(%)
+C2(kW)
+C3(R$)
+C4(R$)
+C5
+Município A
+15
+0.8
+980
+0.75
+5.2
+Município B
+5
+2.1
+1850
+0.62
+5.8
+Município C
+22
+0.3
+650
+0.89
+4.9
+Pesos: w = [0.20, 0.20, 0.15, 0.25, 0.20]. Resultado esperado: B > A > C (B menos vulnerável).
+Recomenda-se prototipação com Figma ou Excalidraw. Telas principais:
+Dashboard Principal: Cards KPI (total municípios, média Ci, município mais vulnerável), gráfico de barras do ranking, mapa com pontos coloridos por faixa de vulnerabilidade.
+Configuração TOPSIS: Tabela editável de critérios com sliders para pesos (soma = 1.0), seletor de tipo (benefício/custo).
+Resultado da Simulação: Tabela ranqueada com Ci, gráfico radar por município, botão de exportação.
+Cadastro de Municípios: Formulário com validação, busca por CEP/IBGE.
+Mapa Georreferenciado: Leaflet com camadas de calor por indicador.
+Estrutura de Diretórios
+plataforma-energia-renovavel/
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   ├── hooks/
+│   │   └── utils/
+│   ├── public/
+│   └── package.json
+├── backend/
+│   ├── src/
+│   │   ├── controllers/
+│   │   ├── services/
+│   │   │   └── topsis.service.js
+│   │   ├── models/
+│   │   ├── routes/
+│   │   ├── middlewares/
+│   │   └── config/
+│   ├── tests/
+│   ├── migrations/
+│   └── package.json
+├── docs/
+│   ├── requisitos/
+│   ├── uml/
+│   ├── api/
+│   └── manual-usuario/
+├── docker-compose.yml
+└── README.md
+Nível
+Ferramenta
+Escopo
+Exemplo
+Unitário
+Jest / Pytest
+Funções isoladas
+topsis.normalizar() retorna valores entre 0 e 1
+Integração
+Supertest
+API + DB
+POST /api/topsis/executar retorna 200 com ranking
+Sistema
+Cypress
+Fluxo E2E
+Usuário cadastra município → executa TOPSIS → vê ranking
+Aceitação
+Manual + Checklist
+Critérios do cliente
+Ranking confere com cálculo manual em planilha
+Exemplo de Teste Unitário (Jest)
+describe('TOPSIS Service', () => {
+test('normalização vetorial preserva proporções', () => {
+const col = [3, 4]; // norma = 5
+const result = normalizar(col);
+expect(result[0]).toBeCloseTo(0.6);
+expect(result[1]).toBeCloseTo(0.8);
+});
+test('Ci deve estar entre 0 e 1', () => {
+const resultado = topsis(matrizTeste, pesos, tipos);
+resultado.forEach(r => {
+expect(r.ci).toBeGreaterThanOrEqual(0);
+expect(r.ci).toBeLessThanOrEqual(1);
+});
+});
+});
+Baseado na ISO/IEC 25010 (evolução da ISO 9126):
+Característica
+Sub-característica
+Métrica
+Meta
+Adequação Funcional
+Completude
+% requisitos implementados
+≥ 90%
+Eficiência de Desempenho
+Tempo de resposta
+Tempo do cálculo TOPSIS
+< 3s
+Usabilidade
+Aprendizado
+Tempo para primeira tarefa
+< 5min
+Confiabilidade
+Disponibilidade
+Uptime mensal
+≥ 99,5%
+Segurança
+Confidencialidade
+Dados protegidos por auth
+100%
+Manutenibilidade
+Modularidade
+Acoplamento entre módulos
+Baixo
+Portabilidade
+Adaptabilidade
+Funciona em 3+ navegadores
+Chrome, Firefox, Safari
+Sprints (16 semanas)
+Sprint
+Semanas
+Entrega
+1
+1–2
+Contextualização, requisitos, stakeholders, setup do repositório
+2
+3–4
+Modelagem UML completa, modelagem do banco de dados
+3
+5–6
+Backend: CRUD municípios e critérios, migrations
+4
+7–8
+Backend: engine TOPSIS, testes unitários
+5
+9–10
+Frontend: dashboard, formulários, integração API
+6
+11–12
+Mapa georreferenciado, exportação de relatórios
+7
+13–14
+Testes de integração e sistema, correções
+8
+15–16
+Documentação final, deploy, apresentação
+Papéis da Equipe (Scrum)
+Product Owner: Professor orientador (valida prioridades e aceita entregas)
+Scrum Master: Aluno líder (facilita cerimônias, remove impedimentos)
+Dev Team: 3–5 alunos (frontend, backend, dados/TOPSIS)
+Camada
+Tecnologia
+Justificativa
+Frontend
+React + Vite + TailwindCSS
+Componentização, performance, produtividade
+Mapas
+Leaflet + React-Leaflet
+Open-source, leve, suporte a GeoJSON
+Gráficos
+Chart.js ou Recharts
+Integração React, responsivo
+Backend
+Node.js + Express (ou Python + FastAPI)
+Ecossistema rico, fácil aprendizado
+TOPSIS
+Implementação própria ou lib `topsis-js`
+Controle total do algoritmo
+Banco
+PostgreSQL + PostGIS
+Dados geoespaciais, robusto, gratuito
+ORM
+Prisma ou Sequelize (JS) / SQLAlchemy (Py)
+Migrations, type-safety
+Auth
+JWT + bcrypt
+Stateless, seguro
+DevOps
+Docker + GitHub Actions
+CI/CD, reprodutibilidade
+Docs
+Swagger/OpenAPI + Docusaurus
+API interativa, docs estáticos
+Critérios para Curso Técnico
+Critério
+Peso
+Descrição
+Funcionalidade
+30%
+CRUD completo + TOPSIS funcional
+Interface
+20%
+Usabilidade, responsividade
+Documentação
+20%
+README, diagramas, manual
+Código
+15%
+Organização, boas práticas
+Apresentação
+15%
+Defesa oral e demonstração
+Critérios para Engenharia de Computação
+Critério
+Peso
+Descrição
+Arquitetura
+20%
+Camadas, patterns, escalabilidade
+Modelagem UML
+15%
+Completude e coerência dos diagramas
+Qualidade ISO
+15%
+Aderência à ISO 25010
+Testes
+15%
+Cobertura ≥ 80%, CI/CD
+TOPSIS
+15%
+Corretude matemática, validação
+Documentação
+10%
+Técnica + usuário + API
+Deploy
+10%
+Docker, ambiente configurado
+Checklist Final de Entrega
+☐ Repositório Git com histórico de commits organizado
+☐ README.md completo com instruções de instalação
+☐ Docker Compose funcional (1 comando para subir)
+☐ Documento de Requisitos (RF + RNF)
+☐ Diagramas UML (mínimo: Casos de Uso, Classes, Sequência)
+☐ Banco de dados modelado e com migrations
+☐ API documentada (Swagger)
+☐ TOPSIS implementado com testes de validação
+☐ Frontend responsivo com dashboard
+☐ Testes automatizados (unitários + integração)
+☐ Manual do Usuário
+☐ Apresentação (slides + demo ao vivo)
