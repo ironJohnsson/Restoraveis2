@@ -1,0 +1,25 @@
+# Dependências
+node_modules/
+dist/
+build/
+.cache/
+
+# Banco de dados local
+backend/data/*.sqlite
+backend/data/*.sqlite-journal
+*.sqlite
+*.sqlite3
+
+# Logs e variáveis de ambiente
+*.log
+npm-debug.log*
+.env
+.env.local
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# IDE e ferramentas
+.vscode/
+.idea/

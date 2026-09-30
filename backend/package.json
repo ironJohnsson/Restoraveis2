@@ -1,0 +1,31 @@
+{
+  "name": "plataforma-energia-renovavel-backend",
+  "version": "1.0.0",
+  "description": "API RESTful e Motor TOPSIS para Mensuração Multicritério de Vulnerabilidade Social Energética",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test tests/**/*.test.js",
+    "seed": "node src/database/seed.js"
+  },
+  "keywords": [
+    "topsis",
+    "energia-renovavel",
+    "vulnerabilidade-social",
+    "ods7",
+    "api-rest"
+  ],
+  "author": "Equipe de Desenvolvimento - Plataforma TOPSIS",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.3",
+    "jsonwebtoken": "^9.0.3",
+    "pdfkit": "^0.15.2",
+    "sql.js": "^1.14.2",
+    "swagger-ui-express": "^5.0.1"
+  }
+}
