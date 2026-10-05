@@ -21,20 +21,27 @@ flowchart LR
         UC04(["UC04: Gerar e Exportar Relatórios"])
         UC05(["UC05: Visualizar Mapa Georreferenciado"])
         UC06(["UC06: Autenticar no Sistema"])
+        UC07(["UC07: Gerenciar Usuários e Perfis"])
+        UC08(["UC08: Importar Dados Externos (CSV / IBGE)"])
     end
 
     Admin --> UC01
-    Admin --> UC06
+    Admin --> UC07
+    Admin --> UC08
+    Admin --> UC02
     Pesq --> UC02
     Pesq --> UC03
-    Pesq --> UC04
-    Pesq --> UC05
-    Pesq --> UC06
     Gestor --> UC03
     Gestor --> UC04
     Gestor --> UC05
+    Pesq --> UC04
+    Pesq --> UC05
+    Admin --> UC06
+    Pesq --> UC06
     Gestor --> UC06
 ```
+
+O Administrador também pode executar UC03, UC04 e UC05 (omitidos no diagrama para não poluí-lo). Todos os casos de uso têm como pré-condição o UC06.
 
 ### Especificação Textual dos Principais Casos de Uso
 
@@ -42,30 +49,32 @@ flowchart LR
 - **Ator Primário:** Administrador
 - **Pré-condição:** Administrador autenticado no sistema com perfil válido.
 - **Fluxo Principal:**
-  1. O Administrador acessa a aba "Municípios" e seleciona "Cadastrar Novo Município".
-  2. O sistema exibe o formulário solicitando Nome, UF, População, IDH, Latitude e Longitude.
-  3. O Administrador preenche os dados e clica em "Salvar".
-  4. O sistema valida os campos obrigatórios e verifica a unicidade do par (Nome, UF).
-  5. O sistema persiste as informações no banco de dados e atualiza a listagem.
-  6. O sistema exibe mensagem de confirmação de cadastro bem-sucedido.
+  1. O Administrador acessa a aba "Municípios" e seleciona "Novo Município".
+  2. O sistema exibe o formulário com Nome, UF, Código IBGE, População, IDH, Latitude, Longitude e um campo por critério.
+  3. O Administrador preenche os dados (ou usa "Preencher com dados do IBGE") e clica em "Salvar Município".
+  4. O sistema valida os campos e verifica a unicidade do par (Nome, UF) e do código IBGE.
+  5. O sistema persiste o município e seus indicadores em uma única transação e atualiza a listagem.
+  6. O sistema exibe mensagem de confirmação.
+- **Fluxos Alternativos:** dados inválidos ou município já cadastrado — o sistema informa o motivo e mantém o formulário aberto. Os mesmos passos valem para editar e excluir.
 
 #### UC02 — Configurar Critérios TOPSIS
 - **Ator Primário:** Pesquisador
 - **Fluxo Principal:**
-  1. O Pesquisador acessa a tela de "Configuração de Critérios".
-  2. O sistema apresenta a lista de indicadores cadastrados (C1 a C7) com pesos atuais e tipos.
-  3. O Pesquisador ajusta os sliders de ponderação ou altera o direcionamento (Benefício ou Custo).
-  4. O sistema valida automaticamente se a somatória dos pesos atinge $1,0$ ($100\%$).
-  5. O sistema salva a configuração para uso na simulação corrente.
+  1. O Pesquisador acessa a aba "Critérios".
+  2. O sistema apresenta os indicadores cadastrados com tipo, unidade, fonte e peso.
+  3. O Pesquisador cria, edita ou exclui critérios, altera o tipo (Benefício ou Custo) e ajusta os sliders de peso.
+  4. O sistema só permite salvar os pesos quando a soma é $1,0$ ($100\%$).
+  5. O sistema grava a configuração, que passa a ser o padrão das próximas simulações.
 
 #### UC03 — Executar TOPSIS
 - **Atores:** Pesquisador, Gestor Público
 - **Fluxo Principal:**
   1. O ator seleciona os municípios a serem incluídos na análise comparativa.
-  2. O ator revisa os critérios selecionados e aciona "Calcular TOPSIS".
-  3. O sistema despacha a matriz de decisão ao motor matemático.
+  2. O ator revisa os pesos (ou escolhe um cenário) e aciona "Executar Cálculo TOPSIS".
+  3. O sistema monta a matriz de decisão com os valores vigentes e a envia ao motor matemático.
   4. O motor executa a normalização vetorial, calcula $A^+$, $A^-$, as distâncias euclidianas e o coeficiente $C_i$.
-  5. O sistema armazena a simulação no histórico e renderiza os gráficos de ranking, tabela detalhada e mapa temático.
+  5. O sistema armazena a simulação no histórico e exibe os gráficos de ranking, a tabela detalhada e o mapa.
+- **Fluxo Alternativo:** municípios sem dado em algum critério ponderado ficam fora do cálculo e são listados em um aviso; com menos de 2 alternativas completas o cálculo não é executado.
 
 #### UC04 — Gerar Relatório
 - **Ator Primário:** Gestor Público
@@ -89,6 +98,7 @@ classDiagram
         +float idh
         +float latitude
         +float longitude
+        +string codigo_ibge
         +DateTime created_at
     }
 
@@ -98,7 +108,7 @@ classDiagram
         +string nome
         +string descricao
         +string tipo
-        +float peso_padrao
+        +float peso
         +string unidade
         +string fonte
     }
@@ -114,6 +124,7 @@ classDiagram
     class SimulacaoTOPSIS {
         +int id
         +int usuario_id
+        +string titulo
         +DateTime data_execucao
         +json parametros
         +string status
@@ -135,6 +146,17 @@ classDiagram
         +string email
         +string senha_hash
         +string perfil
+        +DateTime created_at
+    }
+
+    class TopsisService {
+        <<service>>
+        +normalizarMatriz(matriz)
+        +calcularMatrizPonderada(normalizada, pesos)
+        +calcularSolucoesIdeais(ponderada, tipos)
+        +calcularDistanciasEuclidianas(ponderada, aPlus, aMinus)
+        +calcularCoeficienteProximidade(dPlus, dMinus)
+        +executar(alternativas, criterios, pesos, matriz)
     }
 
     Municipio "1" <-- "*" MatrizDecisao : compoe
@@ -142,6 +164,8 @@ classDiagram
     SimulacaoTOPSIS "1" --> "*" ResultadoRanking : gera
     Municipio "1" <-- "*" ResultadoRanking : classifica
     Usuario "1" --> "*" SimulacaoTOPSIS : executa
+    TopsisService ..> MatrizDecisao : lê
+    TopsisService ..> ResultadoRanking : produz
 ```
 
 ---
@@ -152,27 +176,31 @@ classDiagram
 sequenceDiagram
     autonumber
     actor Usuario as Pesquisador / Gestor
-    participant Front as Frontend (React UI)
-    participant API as API Controller (Express)
-    participant Engine as TOPSIS Service
+    participant Front as Frontend (React)
+    participant API as API (rotas + auth + controller)
+    participant Sim as SimulacaoService
+    participant Engine as TopsisService
     participant DB as Banco de Dados
 
-    Usuario->>Front: Seleciona pesos e clica "Executar TOPSIS"
-    Front->>API: POST /api/topsis/executar {criterios, pesos, municipioIds}
-    API->>DB: Consulta valores da Matriz de Decisão
-    DB-->>API: Retorna matriz de dados brutos
-    API->>Engine: calcular(matriz, pesos, tipos)
-    Note over Engine: Passo 1: Normalização Vetorial r_ij
-    Note over Engine: Passo 2: Matriz Ponderada v_ij = w_j * r_ij
-    Note over Engine: Passo 3: Determinar Soluções Ideais A+ e A-
-    Note over Engine: Passo 4: Calcular Distâncias Euclidianas D+ e D-
-    Note over Engine: Passo 5: Coeficiente de Proximidade Ci = D- / (D+ + D-)
-    Note over Engine: Passo 6: Ordenação do Ranking
-    Engine-->>API: Retorna ranking detalhado e estatísticas
-    API->>DB: Salva registro da Simulação e Resultados
-    DB-->>API: Confirmação de persistência
-    API-->>Front: 200 OK {simulacaoId, ranking, metricas}
-    Front-->>Usuario: Renderiza Dashboard (Gráficos, Mapa e Tabela)
+    Usuario->>Front: Ajusta os pesos e clica "Executar Cálculo TOPSIS"
+    Front->>API: POST /api/topsis/executar {pesosPersonalizados, municipioIds} + token JWT
+    API->>API: Valida o token e o perfil
+    API->>Sim: executar(payload, usuario)
+    Sim->>DB: Consulta critérios, municípios e valores vigentes da matriz
+    DB-->>Sim: Dados brutos
+    Sim->>Sim: Separa municípios com dados incompletos
+    Sim->>Engine: executar(alternativas, criterios, pesos, matriz)
+    Note over Engine: normalizar()
+    Note over Engine: calcularPonderada()
+    Note over Engine: idealPositiva() e idealNegativa()
+    Note over Engine: distancias()
+    Note over Engine: coeficienteProximidade()
+    Engine-->>Sim: ranking[] e estatísticas
+    Sim->>DB: salvarSimulacao(resultado) em uma transação
+    DB-->>Sim: id da simulação
+    Sim-->>API: resultado
+    API-->>Front: 200 OK {simulacaoId, ranking, criteriosInfo, alternativasExcluidas}
+    Front-->>Usuario: Exibe dashboard com ranking, radar e mapa
 ```
 
 ---
@@ -183,7 +211,10 @@ sequenceDiagram
 flowchart TD
     Start([Início]) --> A[Selecionar Municípios / Alternativas]
     A --> B[Definir Critérios e Atribuir Pesos]
-    B --> C[Construir Matriz de Decisão X_mxn]
+    B --> B2{Todos os dados dos critérios ponderados estão preenchidos?}
+    B2 -->|Não| B3[Separar o município como alternativa não avaliada]
+    B3 --> C
+    B2 -->|Sim| C[Construir Matriz de Decisão X_mxn]
     C --> D[Calcular Norma Vetorial das Colunas]
     D --> E["Normalizar Matriz: r_ij = x_ij / √(Σ x_kj²)"]
     E --> F["Ponderar Matriz: v_ij = w_j * r_ij"]
@@ -204,37 +235,43 @@ flowchart TD
 ```mermaid
 flowchart TD
     subgraph Frontend ["Subsistema Frontend (React + Vite + TailwindCSS)"]
-        UI_Dash["Dashboard Component"]
-        UI_Map["Leaflet GIS Map Component"]
-        UI_Form["Formulários e Sliders Component"]
-        UI_Report["Gerador de Relatórios (PDF/CSV)"]
+        UI_Login["Login e sessão (useAuth)"]
+        UI_Dash["Dashboard (KPIs, ranking, radar)"]
+        UI_Map["Mapa Leaflet (marcadores e calor)"]
+        UI_Form["Formulários: municípios, critérios, usuários"]
+        UI_Api["Cliente da API (services/api.js)"]
     end
 
     subgraph Backend ["Subsistema Backend (Node.js + Express)"]
-        C_Auth["Auth Controller (JWT/bcrypt)"]
-        C_Mun["Município Controller"]
-        C_Crit["Critérios Controller"]
-        C_Topsis["TOPSIS Controller"]
-        S_Topsis["Motor Matemático TOPSIS"]
-        M_Layer["Camada de Modelos e Persistência"]
+        Auth["AuthModule (JWT, bcrypt, perfis)"]
+        Ctrl["Controllers"]
+        Topsis["TOPSISEngine (TopsisService + SimulacaoService)"]
+        Import["DataImport (CSV, IBGE, ViaCEP)"]
+        Report["Relatórios (PDF / CSV)"]
+        Models["Models (repositórios SQL)"]
     end
 
-    subgraph Persistencia ["Camada de Armazenamento"]
-        DB_SQL[("Banco Relacional: SQLite / PostgreSQL")]
+    subgraph Persistencia ["Armazenamento"]
+        DB_SQL[("PostgreSQL + PostGIS / SQLite")]
     end
 
-    UI_Dash -->|REST / JSON| C_Topsis
-    UI_Map -->|REST / JSON| C_Mun
-    UI_Form -->|REST / JSON| C_Crit
-    UI_Report -->|REST / JSON| C_Topsis
+    Externo["APIs públicas: IBGE e ViaCEP"]
 
-    C_Topsis --> S_Topsis
-    C_Topsis --> M_Layer
-    C_Mun --> M_Layer
-    C_Crit --> M_Layer
-    C_Auth --> M_Layer
-
-    M_Layer -->|SQL / Queries| DB_SQL
+    UI_Login --> UI_Api
+    UI_Dash --> UI_Api
+    UI_Map --> UI_Api
+    UI_Form --> UI_Api
+    UI_Api -->|REST / JSON + JWT| Auth
+    Auth --> Ctrl
+    Ctrl --> Topsis
+    Ctrl --> Import
+    Ctrl --> Report
+    Ctrl --> Models
+    Topsis --> Models
+    Import --> Models
+    Import -->|HTTPS| Externo
+    Report --> Topsis
+    Models -->|SQL| DB_SQL
 ```
 
 ---
@@ -244,23 +281,24 @@ flowchart TD
 ```mermaid
 flowchart LR
     subgraph Cliente ["Dispositivo Cliente"]
-        Browser["Navegador Web (Chrome/Firefox/Edge)"]
+        Browser["Navegador Web (Chrome / Firefox / Safari / Edge)"]
     end
 
-    subgraph Host ["Ambiente Servidor / Docker"]
-        subgraph Proxy ["Proxy Reverso"]
-            Nginx["Nginx Web Server (Porta 80 / 443)"]
+    subgraph Host ["Servidor com Docker Compose"]
+        subgraph CFront ["Contêiner frontend (porta 3000)"]
+            Nginx["Nginx: arquivos da SPA + proxy reverso"]
         end
-
-        subgraph Containers ["Contêineres de Aplicação"]
-            AppFront["Frontend Container (Porta 3000 / Vite Build)"]
-            AppBack["Backend API Container (Porta 5000 / Node.js)"]
-            DBServer[("Database Container (PostgreSQL + PostGIS / SQLite)")]
+        subgraph CBack ["Contêiner backend (porta 5000)"]
+            Node["App Server Node.js + Express"]
+        end
+        subgraph CDb ["Contêiner db (rede interna)"]
+            DBServer[("PostgreSQL 16 + PostGIS")]
         end
     end
 
     Browser -->|HTTP / HTTPS| Nginx
-    Nginx -->|Roteamento estático| AppFront
-    Nginx -->|Roteamento /api/*| AppBack
-    AppBack -->|Conexão TCP / Pool| DBServer
+    Nginx -->|/api e /api-docs| Node
+    Node -->|TCP 5432, pool de conexões| DBServer
 ```
+
+Em desenvolvimento, sem Docker, o backend usa um arquivo SQLite local e o Vite faz o papel de proxy.

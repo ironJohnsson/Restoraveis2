@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" width="1200" height="760" font-family="Arial, Helvetica, sans-serif" role="img" aria-label="Protótipo 5 — Mapa Georreferenciado">
+  <title>Protótipo 5 — Mapa Georreferenciado</title>
+  <rect width="1200" height="760" fill="#ffffff"/>
+  <rect x="20" y="20" width="1160" height="720" rx="14" fill="#f8fafc" stroke="#64748b" stroke-width="2"/>
+  <rect x="40" y="36" width="40" height="40" rx="8" fill="#cbd5e1" stroke="#64748b" stroke-width="1.5"/>
+  <text x="92" y="54" font-size="16" font-weight="bold" fill="#0f172a" text-anchor="start">Plataforma Energia Renovável</text>
+  <text x="92" y="72" font-size="11" font-weight="normal" fill="#64748b" text-anchor="start">TOPSIS • Vulnerabilidade Social Energética • ODS 7</text>
+  <text x="1140" y="54" font-size="12" font-weight="bold" fill="#0f172a" text-anchor="end">Nome do usuário</text>
+  <text x="1140" y="70" font-size="11" font-weight="normal" fill="#64748b" text-anchor="end">Perfil  |  Sair</text>
+  <rect x="40" y="90" width="90.8" height="28" rx="7" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="85.4" y="109" font-size="12" font-weight="normal" fill="#475569" text-anchor="middle">Dashboard</text>
+  <rect x="138.8" y="90" width="141.2" height="28" rx="7" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="209.4" y="109" font-size="12" font-weight="normal" fill="#475569" text-anchor="middle">Simulador TOPSIS</text>
+  <rect x="288.0" y="90" width="54.8" height="28" rx="7" fill="#475569" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="315.4" y="109" font-size="12" font-weight="bold" fill="#ffffff" text-anchor="middle">Mapa</text>
+  <rect x="350.8" y="90" width="98.0" height="28" rx="7" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="399.8" y="109" font-size="12" font-weight="normal" fill="#475569" text-anchor="middle">Municípios</text>
+  <rect x="456.8" y="90" width="90.8" height="28" rx="7" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="502.2" y="109" font-size="12" font-weight="normal" fill="#475569" text-anchor="middle">Critérios</text>
+  <rect x="555.6" y="90" width="184.4" height="28" rx="7" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="647.8000000000001" y="109" font-size="12" font-weight="normal" fill="#475569" text-anchor="middle">Histórico &amp; Relatórios</text>
+  <rect x="748.0" y="90" width="83.6" height="28" rx="7" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="789.8" y="109" font-size="12" font-weight="normal" fill="#475569" text-anchor="middle">Usuários</text>
+  <rect x="839.6" y="90" width="105.2" height="28" rx="7" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="892.2" y="109" font-size="12" font-weight="normal" fill="#475569" text-anchor="middle">Metodologia</text>
+  <line x1="40" y1="128" x2="1160" y2="128" stroke="#cbd5e1" stroke-width="1.5"/>
+  <rect x="40" y="146" width="1120" height="100" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="56" y="176" font-size="18" font-weight="bold" fill="#0f172a" text-anchor="start">Módulo Cartográfico Georreferenciado</text>
+  <rect x="700" y="158" width="90" height="28" rx="7" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="745.0" y="177" font-size="12" font-weight="bold" fill="#334155" text-anchor="middle">Todos (13)</text>
+  <rect x="796" y="158" width="110" height="28" rx="7" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="851.0" y="177" font-size="12" font-weight="bold" fill="#334155" text-anchor="middle">Alta Vuln. (2)</text>
+  <rect x="912" y="158" width="90" height="28" rx="7" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="957.0" y="177" font-size="12" font-weight="bold" fill="#334155" text-anchor="middle">Média (10)</text>
+  <rect x="1008" y="158" width="80" height="28" rx="7" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="1048.0" y="177" font-size="12" font-weight="bold" fill="#334155" text-anchor="middle">Baixa (1)</text>
+  <line x1="56" y1="198" x2="1144" y2="198" stroke="#cbd5e1" stroke-width="1.5"/>
+  <rect x="56" y="208" width="110" height="28" rx="7" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="111" y="227" font-size="12" font-weight="normal" fill="#334155" text-anchor="middle">📍 Marcadores</text>
+  <rect x="172" y="208" width="130" height="28" rx="7" fill="#475569" stroke="#475569" stroke-width="1.5"/>
+  <text x="237" y="227" font-size="12" font-weight="bold" fill="#ffffff" text-anchor="middle">🔥 Mapa de calor</text>
+  <text x="322" y="227" font-size="12" font-weight="bold" fill="#334155" text-anchor="start">Indicador:</text>
+  <rect x="390" y="208" width="300" height="28" rx="7" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="402" y="227" font-size="12" font-weight="normal" fill="#334155" text-anchor="start">C1 — % domicílios sem eletricidade  ▾</text>
+  <rect x="40" y="262" width="1120" height="360" rx="8" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="600" y="290" font-size="13" font-weight="bold" fill="#64748b" text-anchor="middle">Mapa Leaflet (OpenStreetMap)</text>
+  <rect x="56" y="278" width="30" height="60" rx="6" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="71" y="300" font-size="16" font-weight="bold" fill="#334155" text-anchor="middle">+</text>
+  <text x="71" y="328" font-size="16" font-weight="bold" fill="#334155" text-anchor="middle">−</text>
+  <circle cx="420" cy="430" r="70" fill="#ef4444" opacity="0.28"/>
+  <circle cx="420" cy="430" r="35.0" fill="#ef4444" opacity="0.4"/>
+  <circle cx="420" cy="430" r="4" fill="#0f172a" stroke="none"/>
+  <circle cx="560" cy="380" r="55" fill="#f97316" opacity="0.28"/>
+  <circle cx="560" cy="380" r="27.5" fill="#f97316" opacity="0.4"/>
+  <circle cx="560" cy="380" r="4" fill="#0f172a" stroke="none"/>
+  <circle cx="700" cy="470" r="62" fill="#eab308" opacity="0.28"/>
+  <circle cx="700" cy="470" r="31.0" fill="#eab308" opacity="0.4"/>
+  <circle cx="700" cy="470" r="4" fill="#0f172a" stroke="none"/>
+  <circle cx="860" cy="400" r="48" fill="#22c55e" opacity="0.28"/>
+  <circle cx="860" cy="400" r="24.0" fill="#22c55e" opacity="0.4"/>
+  <circle cx="860" cy="400" r="4" fill="#0f172a" stroke="none"/>
+  <circle cx="960" cy="500" r="58" fill="#f97316" opacity="0.28"/>
+  <circle cx="960" cy="500" r="29.0" fill="#f97316" opacity="0.4"/>
+  <circle cx="960" cy="500" r="4" fill="#0f172a" stroke="none"/>
+  <circle cx="300" cy="520" r="44" fill="#eab308" opacity="0.28"/>
+  <circle cx="300" cy="520" r="22.0" fill="#eab308" opacity="0.4"/>
+  <circle cx="300" cy="520" r="4" fill="#0f172a" stroke="none"/>
+  <rect x="940" y="540" width="200" height="66" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="954" y="560" font-size="11" font-weight="bold" fill="#334155" text-anchor="start">Mapa de calor — C1</text>
+  <defs><linearGradient id="g"><stop offset="0" stop-color="#22c55e"/><stop offset="0.5" stop-color="#eab308"/><stop offset="1" stop-color="#ef4444"/></linearGradient></defs><rect x="954" y="570" width="172" height="8" rx="4" fill="url(#g)"/>
+  <text x="954" y="596" font-size="10" font-weight="normal" fill="#334155" text-anchor="start">menor</text>
+  <text x="1126" y="596" font-size="10" font-weight="normal" fill="#334155" text-anchor="end">maior</text>
+  <rect x="620" y="330" width="210" height="92" rx="8" fill="#ffffff" stroke="#475569" stroke-width="1.5"/>
+  <text x="634" y="352" font-size="12" font-weight="bold" fill="#0f172a" text-anchor="start">Município (UF)        #3</text>
+  <text x="634" y="372" font-size="11" font-weight="normal" fill="#334155" text-anchor="start">Coeficiente Ci: 0,6473</text>
+  <text x="634" y="388" font-size="11" font-weight="normal" fill="#334155" text-anchor="start">Classificação: Média</text>
+  <text x="634" y="404" font-size="11" font-weight="normal" fill="#334155" text-anchor="start">População • IDH • Coordenadas</text>
+  <rect x="40" y="638" width="1120" height="74" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="56" y="664" font-size="13" font-weight="bold" fill="#0f172a" text-anchor="start">Alternativas Plotadas: cartões com nome, posição, coordenadas e Ci</text>
+  <rect x="56" y="674" width="262" height="28" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+  <rect x="332" y="674" width="262" height="28" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+  <rect x="608" y="674" width="262" height="28" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+  <rect x="884" y="674" width="262" height="28" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+  <circle cx="250" cy="202" r="11" fill="#0f172a" stroke="none"/>
+  <text x="250" y="206" font-size="11" font-weight="bold" fill="#ffffff" text-anchor="middle">1</text>
+  <text x="268" y="206" font-size="12" font-weight="normal" fill="#0f172a" text-anchor="start">Camada de calor por indicador</text>
+  <circle cx="850" cy="150" r="11" fill="#0f172a" stroke="none"/>
+  <text x="850" y="154" font-size="11" font-weight="bold" fill="#ffffff" text-anchor="middle">2</text>
+  <text x="868" y="154" font-size="12" font-weight="normal" fill="#0f172a" text-anchor="start">Filtro por faixa</text>
+  <circle cx="850" cy="324" r="11" fill="#0f172a" stroke="none"/>
+  <text x="850" y="328" font-size="11" font-weight="bold" fill="#ffffff" text-anchor="middle">3</text>
+  <text x="868" y="328" font-size="12" font-weight="normal" fill="#0f172a" text-anchor="start">Popup do município</text>
+</svg>

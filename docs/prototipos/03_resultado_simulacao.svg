@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" width="1200" height="760" font-family="Arial, Helvetica, sans-serif" role="img" aria-label="Protótipo 3 — Resultado da Simulação">
+  <title>Protótipo 3 — Resultado da Simulação</title>
+  <rect width="1200" height="760" fill="#ffffff"/>
+  <rect x="20" y="20" width="1160" height="720" rx="14" fill="#f8fafc" stroke="#64748b" stroke-width="2"/>
+  <rect x="40" y="36" width="40" height="40" rx="8" fill="#cbd5e1" stroke="#64748b" stroke-width="1.5"/>
+  <text x="92" y="54" font-size="16" font-weight="bold" fill="#0f172a" text-anchor="start">Plataforma Energia Renovável</text>
+  <text x="92" y="72" font-size="11" font-weight="normal" fill="#64748b" text-anchor="start">TOPSIS • Vulnerabilidade Social Energética • ODS 7</text>
+  <text x="1140" y="54" font-size="12" font-weight="bold" fill="#0f172a" text-anchor="end">Nome do usuário</text>
+  <text x="1140" y="70" font-size="11" font-weight="normal" fill="#64748b" text-anchor="end">Perfil  |  Sair</text>
+  <rect x="40" y="90" width="90.8" height="28" rx="7" fill="#475569" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="85.4" y="109" font-size="12" font-weight="bold" fill="#ffffff" text-anchor="middle">Dashboard</text>
+  <rect x="138.8" y="90" width="141.2" height="28" rx="7" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="209.4" y="109" font-size="12" font-weight="normal" fill="#475569" text-anchor="middle">Simulador TOPSIS</text>
+  <rect x="288.0" y="90" width="54.8" height="28" rx="7" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="315.4" y="109" font-size="12" font-weight="normal" fill="#475569" text-anchor="middle">Mapa</text>
+  <rect x="350.8" y="90" width="98.0" height="28" rx="7" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="399.8" y="109" font-size="12" font-weight="normal" fill="#475569" text-anchor="middle">Municípios</text>
+  <rect x="456.8" y="90" width="90.8" height="28" rx="7" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="502.2" y="109" font-size="12" font-weight="normal" fill="#475569" text-anchor="middle">Critérios</text>
+  <rect x="555.6" y="90" width="184.4" height="28" rx="7" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="647.8000000000001" y="109" font-size="12" font-weight="normal" fill="#475569" text-anchor="middle">Histórico &amp; Relatórios</text>
+  <rect x="748.0" y="90" width="83.6" height="28" rx="7" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="789.8" y="109" font-size="12" font-weight="normal" fill="#475569" text-anchor="middle">Usuários</text>
+  <rect x="839.6" y="90" width="105.2" height="28" rx="7" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="892.2" y="109" font-size="12" font-weight="normal" fill="#475569" text-anchor="middle">Metodologia</text>
+  <line x1="40" y1="128" x2="1160" y2="128" stroke="#cbd5e1" stroke-width="1.5"/>
+  <rect x="40" y="146" width="1120" height="56" rx="8" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="56" y="180" font-size="14" font-weight="bold" fill="#0f172a" text-anchor="start">Simulação ativa: título • nº • data e hora • autor</text>
+  <rect x="980" y="158" width="164" height="32" rx="8" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="1062.0" y="179" font-size="12" font-weight="bold" fill="#334155" text-anchor="middle">Configurar nova simulação</text>
+  <rect x="40" y="218" width="560" height="260" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="56" y="244" font-size="13" font-weight="bold" fill="#0f172a" text-anchor="start">Diagrama Radar por Município</text>
+  <circle cx="230" cy="366" r="30.360000000000003" fill="none" stroke="#cbd5e1" stroke-dasharray="4 3"/>
+  <circle cx="230" cy="366" r="60.720000000000006" fill="none" stroke="#cbd5e1" stroke-dasharray="4 3"/>
+  <circle cx="230" cy="366" r="92" fill="none" stroke="#cbd5e1" stroke-dasharray="4 3"/>
+  <line x1="230" y1="366" x2="230.0" y2="274.0" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="230.0" y="262.0" font-size="10" font-weight="bold" fill="#334155" text-anchor="middle">C1</text>
+  <line x1="230" y1="366" x2="301.9284963870588" y2="308.6389382289965" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="314.43780010654723" y="302.6631013992568" font-size="10" font-weight="bold" fill="#334155" text-anchor="middle">C2</text>
+  <line x1="230" y1="366" x2="319.6933679207278" y2="386.4719259239809" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="335.29221451563694" y="394.03226086728193" font-size="10" font-weight="bold" fill="#334155" text-anchor="middle">C3</text>
+  <line x1="230" y1="366" x2="269.9173039988153" y2="448.88913584702254" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="276.8594438246963" y="467.3046377334613" font-size="10" font-weight="bold" fill="#334155" text-anchor="middle">C4</text>
+  <line x1="230" y1="366" x2="190.08269600118467" y2="448.88913584702254" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="183.14055617530374" y="467.3046377334613" font-size="10" font-weight="bold" fill="#334155" text-anchor="middle">C5</text>
+  <line x1="230" y1="366" x2="140.30663207927222" y2="386.47192592398096" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="124.70778548436304" y="394.032260867282" font-size="10" font-weight="bold" fill="#334155" text-anchor="middle">C6</text>
+  <line x1="230" y1="366" x2="158.07150361294123" y2="308.63893822899655" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="145.56219989345277" y="302.6631013992568" font-size="10" font-weight="bold" fill="#334155" text-anchor="middle">C7</text>
+  <polygon points="230.0,338.4 294.7,314.4 274.8,376.2 261.9,432.3 194.1,440.6 176.2,378.3 158.1,308.6" fill="#16a34a33" stroke="#16a34a" stroke-width="2"/>
+  <polygon points="230.0,310.8 266.0,337.3 310.7,384.4 257.9,424.0 198.1,432.3 194.1,374.2 201.2,343.1" fill="#2563eb33" stroke="#2563eb" stroke-width="2"/>
+  <text x="380" y="300" font-size="11" font-weight="bold" fill="#334155" text-anchor="start">Selecionar até 4 municípios:</text>
+  <rect x="380" y="312" width="190" height="28" rx="7" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="392" y="331" font-size="12" font-weight="normal" fill="#334155" text-anchor="start">● Município 1</text>
+  <rect x="380" y="348" width="190" height="28" rx="7" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="392" y="367" font-size="12" font-weight="normal" fill="#334155" text-anchor="start">● Município 2</text>
+  <rect x="380" y="384" width="190" height="28" rx="7" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="392" y="403" font-size="12" font-weight="normal" fill="#334155" text-anchor="start">○ Município 3</text>
+  <rect x="380" y="420" width="190" height="28" rx="7" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="392" y="439" font-size="12" font-weight="normal" fill="#334155" text-anchor="start">○ Município 4</text>
+  <rect x="616" y="218" width="544" height="260" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="632" y="244" font-size="13" font-weight="bold" fill="#0f172a" text-anchor="start">Alternativas não avaliadas (dados incompletos)</text>
+  <rect x="632" y="258" width="512" height="60" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="646" y="282" font-size="12" font-weight="bold" fill="#92400e" text-anchor="start">⚠ 1 município não entrou no cálculo por falta de dados</text>
+  <text x="646" y="302" font-size="12" font-weight="normal" fill="#92400e" text-anchor="start">Município Z (BA): sem dado em C1, C4</text>
+  <text x="632" y="350" font-size="12" font-weight="normal" fill="#334155" text-anchor="start">Parâmetros usados: critérios, tipos e pesos normalizados</text>
+  <text x="632" y="374" font-size="12" font-weight="normal" fill="#334155" text-anchor="start">Tempo de processamento: ⏱ ms</text>
+  <rect x="40" y="494" width="1120" height="228" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="56" y="522" font-size="14" font-weight="bold" fill="#0f172a" text-anchor="start">Classificação Oficial do Ranking TOPSIS</text>
+  <rect x="820" y="504" width="160" height="30" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="832" y="524" font-size="12" font-weight="normal" fill="#94a3b8" text-anchor="start">🔍 Filtrar município...</text>
+  <rect x="996" y="504" width="70" height="32" rx="8" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="1031.0" y="525" font-size="12" font-weight="bold" fill="#334155" text-anchor="middle">⬇ CSV</text>
+  <rect x="1074" y="504" width="70" height="32" rx="8" fill="#475569" stroke="#475569" stroke-width="1.5"/>
+  <text x="1109.0" y="525" font-size="12" font-weight="bold" fill="#ffffff" text-anchor="middle">⬇ PDF</text>
+  <text x="56" y="560" font-size="10" font-weight="bold" fill="#64748b" text-anchor="start">POS</text>
+  <text x="120" y="560" font-size="10" font-weight="bold" fill="#64748b" text-anchor="start">MUNICÍPIO / UF</text>
+  <text x="430" y="560" font-size="10" font-weight="bold" fill="#64748b" text-anchor="start">POPULAÇÃO</text>
+  <text x="560" y="560" font-size="10" font-weight="bold" fill="#64748b" text-anchor="start">IDH</text>
+  <text x="650" y="560" font-size="10" font-weight="bold" fill="#64748b" text-anchor="start">D+</text>
+  <text x="760" y="560" font-size="10" font-weight="bold" fill="#64748b" text-anchor="start">D-</text>
+  <text x="870" y="560" font-size="10" font-weight="bold" fill="#64748b" text-anchor="start">ÍNDICE Ci</text>
+  <text x="1000" y="560" font-size="10" font-weight="bold" fill="#64748b" text-anchor="start">DIAGNÓSTICO</text>
+  <line x1="40" y1="574" x2="1160" y2="574" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="56" y="602" font-size="13" font-weight="bold" fill="#334155" text-anchor="start">#1</text>
+  <text x="120" y="602" font-size="13" font-weight="bold" fill="#0f172a" text-anchor="start">Município B</text>
+  <text x="430" y="602" font-size="12" font-weight="normal" fill="#334155" text-anchor="start">000.000</text>
+  <text x="560" y="602" font-size="12" font-weight="normal" fill="#334155" text-anchor="start">0,000</text>
+  <text x="650" y="602" font-size="12" font-weight="normal" fill="#334155" text-anchor="start">0,0000</text>
+  <text x="760" y="602" font-size="12" font-weight="normal" fill="#334155" text-anchor="start">0,0000</text>
+  <rect x="864" y="584" width="74" height="26" rx="6" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="901" y="602" font-size="12" font-weight="bold" fill="#0f172a" text-anchor="middle">1,0000</text>
+  <rect x="996" y="584" width="150" height="26" rx="13" fill="#dcfce7" stroke="none" stroke-width="1.5"/>
+  <text x="1071" y="602" font-size="11" font-weight="bold" fill="#334155" text-anchor="middle">Baixa Vulnerabilidade</text>
+  <line x1="40" y1="620" x2="1160" y2="620" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="56" y="648" font-size="13" font-weight="bold" fill="#334155" text-anchor="start">#2</text>
+  <text x="120" y="648" font-size="13" font-weight="bold" fill="#0f172a" text-anchor="start">Município A</text>
+  <text x="430" y="648" font-size="12" font-weight="normal" fill="#334155" text-anchor="start">000.000</text>
+  <text x="560" y="648" font-size="12" font-weight="normal" fill="#334155" text-anchor="start">0,000</text>
+  <text x="650" y="648" font-size="12" font-weight="normal" fill="#334155" text-anchor="start">0,0000</text>
+  <text x="760" y="648" font-size="12" font-weight="normal" fill="#334155" text-anchor="start">0,0000</text>
+  <rect x="864" y="630" width="74" height="26" rx="6" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="901" y="648" font-size="12" font-weight="bold" fill="#0f172a" text-anchor="middle">0,3361</text>
+  <rect x="996" y="630" width="150" height="26" rx="13" fill="#fee2e2" stroke="none" stroke-width="1.5"/>
+  <text x="1071" y="648" font-size="11" font-weight="bold" fill="#334155" text-anchor="middle">Alta Vulnerabilidade</text>
+  <line x1="40" y1="666" x2="1160" y2="666" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="56" y="694" font-size="13" font-weight="bold" fill="#334155" text-anchor="start">#3</text>
+  <text x="120" y="694" font-size="13" font-weight="bold" fill="#0f172a" text-anchor="start">Município C</text>
+  <text x="430" y="694" font-size="12" font-weight="normal" fill="#334155" text-anchor="start">000.000</text>
+  <text x="560" y="694" font-size="12" font-weight="normal" fill="#334155" text-anchor="start">0,000</text>
+  <text x="650" y="694" font-size="12" font-weight="normal" fill="#334155" text-anchor="start">0,0000</text>
+  <text x="760" y="694" font-size="12" font-weight="normal" fill="#334155" text-anchor="start">0,0000</text>
+  <rect x="864" y="676" width="74" height="26" rx="6" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="901" y="694" font-size="12" font-weight="bold" fill="#0f172a" text-anchor="middle">0,0000</text>
+  <rect x="996" y="676" width="150" height="26" rx="13" fill="#fee2e2" stroke="none" stroke-width="1.5"/>
+  <text x="1071" y="694" font-size="11" font-weight="bold" fill="#334155" text-anchor="middle">Alta Vulnerabilidade</text>
+  <circle cx="250" cy="212" r="11" fill="#0f172a" stroke="none"/>
+  <text x="250" y="216" font-size="11" font-weight="bold" fill="#ffffff" text-anchor="middle">1</text>
+  <text x="268" y="216" font-size="12" font-weight="normal" fill="#0f172a" text-anchor="start">Gráfico radar por município</text>
+  <circle cx="1040" cy="488" r="11" fill="#0f172a" stroke="none"/>
+  <text x="1040" y="492" font-size="11" font-weight="bold" fill="#ffffff" text-anchor="middle">2</text>
+  <text x="1058" y="492" font-size="12" font-weight="normal" fill="#0f172a" text-anchor="start">Botões de exportação</text>
+  <circle cx="420" cy="488" r="11" fill="#0f172a" stroke="none"/>
+  <text x="420" y="492" font-size="11" font-weight="bold" fill="#ffffff" text-anchor="middle">3</text>
+  <text x="438" y="492" font-size="12" font-weight="normal" fill="#0f172a" text-anchor="start">Tabela ranqueada com Ci</text>
+</svg>
