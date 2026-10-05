@@ -1,67 +1,55 @@
 const jwt = require('jsonwebtoken');
 const config = require('../config/config');
+const Usuario = require('../models/usuario.model');
+const asyncHandler = require('../utils/asyncHandler');
+const HttpError = require('../utils/HttpError');
 
 /**
- * Middleware para validar o token JWT no cabeçalho Authorization
+ * Valida o token JWT do cabeçalho Authorization (Bearer) e carrega o usuário do banco.
+ * O perfil usado nas autorizações é sempre o atual do banco: uma conta excluída ou
+ * rebaixada perde o acesso imediatamente, mesmo com um token ainda não expirado.
  */
-function requireAuth(req, res, next) {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader) {
-    return res.status(401).json({
-      sucesso: false,
-      mensagem: 'Token de autenticação não fornecido no cabeçalho Authorization'
-    });
+const requireAuth = asyncHandler(async (req, res, next) => {
+  const cabecalho = req.headers.authorization;
+  if (!cabecalho) {
+    throw new HttpError(401, 'Token de autenticação não fornecido no cabeçalho Authorization');
   }
 
-  const partes = authHeader.split(' ');
+  const partes = cabecalho.split(' ');
   if (partes.length !== 2 || partes[0] !== 'Bearer') {
-    return res.status(401).json({
-      sucesso: false,
-      mensagem: 'Formato do cabeçalho de autenticação inválido. Utilize: Bearer <token>'
-    });
+    throw new HttpError(401, 'Formato do cabeçalho de autenticação inválido. Utilize: Bearer <token>');
   }
 
-  const token = partes[1];
-
+  let payload;
   try {
-    const payload = jwt.verify(token, config.jwtSecret);
-    req.usuario = payload;
-    next();
+    payload = jwt.verify(partes[1], config.jwtSecret);
   } catch (err) {
-    return res.status(401).json({
-      sucesso: false,
-      mensagem: 'Token JWT inválido ou expirado',
-      erro: err.message
-    });
+    throw new HttpError(401, 'Token JWT inválido ou expirado');
   }
-}
+
+  const usuario = await Usuario.buscarPorId(payload.id);
+  if (!usuario) {
+    throw new HttpError(401, 'Usuário do token não existe mais');
+  }
+
+  req.usuario = usuario;
+  next();
+});
 
 /**
- * Middleware para validar perfil de acesso do usuário (RBAC)
- * @param  {...string} perfisPermitidos - Perfis autorizados (ex: 'admin', 'pesquisador', 'gestor')
+ * Controle de acesso por perfil (RBAC). Deve vir depois de requireAuth.
+ * @param  {...string} perfisPermitidos - 'admin', 'pesquisador' e/ou 'gestor'
  */
 function requireRole(...perfisPermitidos) {
   return (req, res, next) => {
     if (!req.usuario) {
-      return res.status(401).json({
-        sucesso: false,
-        mensagem: 'Usuário não autenticado'
-      });
+      return next(new HttpError(401, 'Usuário não autenticado'));
     }
-
     if (!perfisPermitidos.includes(req.usuario.perfil)) {
-      return res.status(403).json({
-        sucesso: false,
-        mensagem: `Acesso negado. Perfil '${req.usuario.perfil}' não tem permissão para esta operação`
-      });
+      return next(new HttpError(403, `Acesso negado. Perfil '${req.usuario.perfil}' não tem permissão para esta operação`));
     }
-
     next();
   };
 }
 
-module.exports = {
-  requireAuth,
-  requireRole
-};
+module.exports = { requireAuth, requireRole };

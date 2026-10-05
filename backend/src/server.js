@@ -2,31 +2,31 @@ const app = require('./app');
 const config = require('./config/config');
 const db = require('./database/db');
 
-async function iniciarServidor() {
-  try {
-    // Inicializa e verifica o banco de dados
-    console.log('[INFO] Inicializando banco de dados relacional...');
-    await db.getDb();
-    console.log('[SUCESSO] Banco de dados inicializado com migrações e seeds!');
+async function iniciarServidor(porta = config.port) {
+  console.log(`[INFO] Inicializando banco de dados (${config.databaseUrl ? 'PostgreSQL' : 'SQLite'})...`);
+  await db.init({ log: console.log });
+  console.log('[SUCESSO] Banco de dados pronto (migrations e dados iniciais aplicados).');
 
-    const server = app.listen(config.port, () => {
-      console.log(`=======================================================`);
-      console.log(`  PLATAFORMA DE ENERGIA RENOVÁVEL COM TOPSIS (API)`);
-      console.log(`  Servidor ouvindo na porta: http://localhost:${config.port}`);
-      console.log(`  Documentação Swagger:      http://localhost:${config.port}/api-docs`);
-      console.log(`  Health Check:              http://localhost:${config.port}/api/status`);
-      console.log(`=======================================================`);
+  return new Promise((resolve) => {
+    const server = app.listen(porta, () => {
+      const enderecoPorta = server.address().port;
+      console.log('=======================================================');
+      console.log('  PLATAFORMA DE ENERGIA RENOVÁVEL COM TOPSIS (API)');
+      console.log(`  Servidor ouvindo na porta: http://localhost:${enderecoPorta}`);
+      console.log(`  Documentação Swagger:      http://localhost:${enderecoPorta}/api-docs`);
+      console.log(`  Health Check:              http://localhost:${enderecoPorta}/api/status`);
+      console.log('=======================================================');
+      resolve(server);
     });
-
-    return server;
-  } catch (err) {
-    console.error('[ERRO FATAL] Falha ao iniciar servidor:', err);
-    process.exit(1);
-  }
+  });
 }
 
+/* istanbul ignore next -- ponto de entrada do processo (`npm start`) */
 if (require.main === module) {
-  iniciarServidor();
+  iniciarServidor().catch((err) => {
+    console.error('[ERRO FATAL] Falha ao iniciar servidor:', err);
+    process.exit(1);
+  });
 }
 
 module.exports = { app, iniciarServidor };

@@ -1,11 +1,15 @@
 const express = require('express');
-const router = express.Router();
 const MunicipiosController = require('../controllers/municipios.controller');
+const { requireRole } = require('../middlewares/auth');
+const asyncHandler = require('../utils/asyncHandler');
 
-router.get('/', MunicipiosController.listar);
-router.get('/:id', MunicipiosController.obterPorId);
-router.post('/', MunicipiosController.criar);
-router.put('/:id', MunicipiosController.atualizar);
-router.delete('/:id', MunicipiosController.deletar);
+const router = express.Router();
+
+router.get('/', asyncHandler(MunicipiosController.listar));
+router.get('/:id', asyncHandler(MunicipiosController.obterPorId));
+// UC01 — Cadastrar Município: ator Administrador
+router.post('/', requireRole('admin'), asyncHandler(MunicipiosController.criar));
+router.put('/:id', requireRole('admin'), asyncHandler(MunicipiosController.atualizar));
+router.delete('/:id', requireRole('admin'), asyncHandler(MunicipiosController.deletar));
 
 module.exports = router;
