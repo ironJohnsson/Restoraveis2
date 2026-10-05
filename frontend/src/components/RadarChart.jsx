@@ -1,25 +1,34 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
+const MAXIMO_COMPARADOS = 4;
+
+/**
+ * Radar comparativo: cada eixo é um critério da simulação e o raio é o valor do
+ * município em relação ao maior valor daquele critério entre as alternativas.
+ * `criterios` são os critérios da própria simulação (criteriosInfo), na mesma
+ * ordem de `valoresOriginais` de cada item do ranking.
+ */
 export default function RadarChart({ criterios = [], ranking = [] }) {
-  if (!ranking || ranking.length === 0 || !criterios || criterios.length === 0) {
+  // Seleciona os 3 primeiros por padrão; a seleção é refeita quando muda a simulação
+  const idsDoRanking = ranking.map(r => r.municipioId).join(',');
+  const [selecionados, setSelecionados] = useState([]);
+  useEffect(() => {
+    setSelecionados(ranking.slice(0, 3).map(r => r.municipioId));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idsDoRanking]);
+
+  const temValores = ranking.some(r => Array.isArray(r.valoresOriginais));
+  if (ranking.length === 0 || criterios.length < 3 || !temValores) {
     return null;
   }
-
-  // Permite selecionar 2 ou 3 municípios para comparar no radar
-  const [selecionados, setSelecionados] = useState(() => {
-    // Seleciona os 3 primeiros por padrão (ou todos se forem <= 3)
-    return ranking.slice(0, 3).map(r => r.municipioId);
-  });
 
   const toggleMunicipio = (id) => {
     if (selecionados.includes(id)) {
       if (selecionados.length > 1) {
         setSelecionados(selecionados.filter(item => item !== id));
       }
-    } else {
-      if (selecionados.length < 4) {
-        setSelecionados([...selecionados, id]);
-      }
+    } else if (selecionados.length < MAXIMO_COMPARADOS) {
+      setSelecionados([...selecionados, id]);
     }
   };
 
@@ -35,23 +44,23 @@ export default function RadarChart({ criterios = [], ranking = [] }) {
   const totalCriterios = criterios.length;
   const anguloPasso = (Math.PI * 2) / totalCriterios;
 
-  // Encontra os valores máximos de cada critério para normalização 0-1 no radar
+  // Maior valor de cada critério, para levar todos os eixos à escala 0-1
   const maximos = criterios.map((c, j) => {
-    const vals = ranking.map(r => r.valoresOriginais ? r.valoresOriginais[j] : 0);
-    return Math.max(...vals, 1);
+    const vals = ranking.map(r => (r.valoresOriginais ? Number(r.valoresOriginais[j]) || 0 : 0));
+    return Math.max(...vals) || 1;
   });
 
   const circulosDeGrade = [0.25, 0.5, 0.75, 1.0];
 
   return (
-    <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+    <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm" data-testid="radar">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
         <div>
           <h3 className="font-bold text-slate-900 text-base font-serif">
             Diagrama Radar Multicritério
           </h3>
           <p className="text-xs text-slate-500">
-            Comparação multidimensional de indicadores entre alternativas
+            Comparação dos indicadores entre até {MAXIMO_COMPARADOS} alternativas (cada eixo em relação ao maior valor do critério)
           </p>
         </div>
 
@@ -65,6 +74,8 @@ export default function RadarChart({ criterios = [], ranking = [] }) {
             return (
               <button
                 key={r.municipioId}
+                type="button"
+                aria-pressed={isSelected}
                 onClick={() => toggleMunicipio(r.municipioId)}
                 className={`text-xs px-2.5 py-1 rounded-lg border font-medium transition-all ${
                   isSelected
@@ -87,7 +98,7 @@ export default function RadarChart({ criterios = [], ranking = [] }) {
       <div className="mt-4 flex flex-col md:flex-row items-center justify-center gap-6">
         {/* Gráfico SVG Puro */}
         <div className="relative">
-          <svg width="300" height="300" className="overflow-visible">
+          <svg width="300" height="300" className="overflow-visible" role="img" aria-label="Gráfico radar comparando os municípios selecionados">
             {/* Círculos concêntricos */}
             {circulosDeGrade.map((frac, idx) => (
               <circle
@@ -110,7 +121,7 @@ export default function RadarChart({ criterios = [], ranking = [] }) {
               const labelY = centro + (raioMaximo + 16) * Math.sin(angulo);
 
               return (
-                <g key={c.codigo || j}>
+                <g key={c.codigo}>
                   <line
                     x1={centro}
                     y1={centro}
@@ -126,6 +137,7 @@ export default function RadarChart({ criterios = [], ranking = [] }) {
                     dominantBaseline="middle"
                     className="text-[10px] font-bold fill-slate-600 font-sans"
                   >
+                    <title>{`${c.codigo} — ${c.nome}${c.unidade ? ` (${c.unidade})` : ''}`}</title>
                     {c.codigo}
                   </text>
                 </g>
@@ -139,7 +151,7 @@ export default function RadarChart({ criterios = [], ranking = [] }) {
 
               const pontos = criterios.map((c, j) => {
                 const angulo = j * anguloPasso - Math.PI / 2;
-                const val = item.valoresOriginais[j] || 0;
+                const val = Number(item.valoresOriginais[j]) || 0;
                 const frac = Math.min(Math.max(val / maximos[j], 0.05), 1.0);
                 const r = raioMaximo * frac;
                 const x = centro + r * Math.cos(angulo);
