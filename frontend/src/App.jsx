@@ -1,118 +1,112 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Header from './components/Header';
+import Mensagem from './components/Mensagem';
+import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import SimuladorPage from './pages/SimuladorPage';
 import MapaPage from './pages/MapaPage';
 import MunicipiosPage from './pages/MunicipiosPage';
+import CriteriosPage from './pages/CriteriosPage';
 import RelatoriosPage from './pages/RelatoriosPage';
+import UsuariosPage from './pages/UsuariosPage';
 import MetodologiaPage from './pages/MetodologiaPage';
+import { AuthProvider, useAuth } from './hooks/useAuth';
 import { api } from './services/api';
 
-export default function App() {
+function Plataforma() {
+  const { pode } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [apiOnline, setApiOnline] = useState(false);
+  const [apiOnline, setApiOnline] = useState(true);
   const [municipios, setMunicipios] = useState([]);
   const [criterios, setCriterios] = useState([]);
   const [simulacaoAtiva, setSimulacaoAtiva] = useState(null);
   const [carregandoSimulacao, setCarregandoSimulacao] = useState(false);
+  const [erro, setErro] = useState(null);
+
+  const carregarCadastros = useCallback(async () => {
+    const [munRes, critRes] = await Promise.all([api.getMunicipios(), api.getCriterios()]);
+    setMunicipios(munRes.dados || []);
+    setCriterios(critRes.dados || []);
+    return { municipios: munRes.dados || [], criterios: critRes.dados || [] };
+  }, []);
+
+  /**
+   * Abre a plataforma com a simulação mais recente do histórico. Se ainda não houver
+   * nenhuma, calcula uma prévia com os pesos padrão SEM gravar (o histórico só recebe
+   * simulações executadas explicitamente pelo usuário).
+   */
+  const carregarDadosIniciais = useCallback(async () => {
+    setErro(null);
+    try {
+      const cadastros = await carregarCadastros();
+      setApiOnline(true);
+
+      const historico = await api.getSimulacoes(1);
+      if (historico.dados && historico.dados.length > 0) {
+        const salva = await api.getSimulacao(historico.dados[0].id);
+        setSimulacaoAtiva(salva.dados);
+      } else if (cadastros.municipios.length >= 2 && cadastros.criterios.length > 0) {
+        const previa = await api.executarTopsis({ titulo: 'Prévia com pesos padrão (não salva)', salvarSimulacao: false });
+        setSimulacaoAtiva(previa);
+      }
+    } catch (err) {
+      if (err.status === 0) setApiOnline(false);
+      // sem alternativas suficientes para a prévia: a tela inicial orienta o usuário
+      if (err.status !== 400 && err.status !== 401) setErro(err.message);
+    }
+  }, [carregarCadastros]);
 
   useEffect(() => {
     carregarDadosIniciais();
-  }, []);
+  }, [carregarDadosIniciais]);
 
-  const carregarDadosIniciais = async () => {
+  const atualizarCadastros = useCallback(async () => {
     try {
-      // 1. Health check da API
-      const statusRes = await api.getStatus();
-      if (statusRes.status === 'online') {
-        setApiOnline(true);
-      }
-
-      // 2. Busca de municípios e critérios
-      const [munRes, critRes] = await Promise.all([
-        api.getMunicipios(),
-        api.getCriterios()
-      ]);
-
-      const listaMunicipios = munRes.dados || [];
-      const listaCriterios = critRes.dados || [];
-
-      setMunicipios(listaMunicipios);
-      setCriterios(listaCriterios);
-
-      // 3. Execução automática do cálculo TOPSIS inicial para alimentar os dashboards
-      if (listaMunicipios.length > 0 && listaCriterios.length > 0) {
-        setCarregandoSimulacao(true);
-        const topsisRes = await api.executarTopsis({
-          titulo: 'Simulação Padrão - Benchmark Inicial',
-          salvarSimulacao: true
-        });
-
-        if (topsisRes.sucesso) {
-          setSimulacaoAtiva(topsisRes);
-        }
-      }
+      await carregarCadastros();
     } catch (err) {
-      console.error('Erro ao conectar à API backend:', err);
-      setApiOnline(false);
-    } finally {
-      setCarregandoSimulacao(false);
+      setErro(err.message);
     }
-  };
+  }, [carregarCadastros]);
 
+  /** Devolve null em caso de sucesso ou a mensagem de erro para a tela do simulador exibir. */
   const handleExecutarTopsis = async (payload) => {
     try {
       setCarregandoSimulacao(true);
-      const res = await api.executarTopsis({
-        ...payload,
-        salvarSimulacao: true
-      });
-
-      if (res.sucesso) {
-        setSimulacaoAtiva(res);
-        // Exibe feedback e rola suavemente para o resultado
-        setActiveTab('dashboard');
-      } else {
-        alert(`Erro na simulação: ${res.mensagem}`);
-      }
+      const res = await api.executarTopsis({ ...payload, salvarSimulacao: true });
+      setSimulacaoAtiva(res);
+      setActiveTab('dashboard');
+      window.scrollTo({ top: 0 });
+      return null;
     } catch (err) {
-      alert('Falha ao comunicar com o servidor para calcular TOPSIS.');
+      return err;
     } finally {
       setCarregandoSimulacao(false);
     }
   };
 
-  const handleCarregarSimulacaoHistorico = (dadosSimulacao) => {
-    setSimulacaoAtiva({
-      simulacaoId: dadosSimulacao.id,
-      titulo: dadosSimulacao.titulo,
-      ranking: dadosSimulacao.ranking,
-      resumoEstatistico: {
-        ciMaximo: Math.max(...dadosSimulacao.ranking.map(r => r.ci)),
-        ciMinimo: Math.min(...dadosSimulacao.ranking.map(r => r.ci)),
-        ciMedio: Number((dadosSimulacao.ranking.reduce((a, b) => a + b.ci, 0) / dadosSimulacao.ranking.length).toFixed(4)),
-        municipioMaisVulneravel: dadosSimulacao.ranking[dadosSimulacao.ranking.length - 1]?.nome,
-        municipioMenosVulneravel: dadosSimulacao.ranking[0]?.nome
-      }
-    });
+  const handleCarregarSimulacaoHistorico = (simulacao) => {
+    setSimulacaoAtiva(simulacao);
     setActiveTab('dashboard');
+    window.scrollTo({ top: 0 });
   };
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col selection:bg-emerald-500 selection:text-white">
-      {/* Barra de Navegação Superior */}
-      <Header
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        apiStatus={apiOnline}
-      />
+      <Header activeTab={activeTab} setActiveTab={setActiveTab} apiStatus={apiOnline} />
 
-      {/* Conteúdo Principal Dinâmico por Aba */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        {erro && (
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex-1"><Mensagem mensagem={{ tipo: 'erro', texto: erro }} /></div>
+            <button type="button" onClick={carregarDadosIniciais} className="text-xs font-semibold text-emerald-700 hover:underline whitespace-nowrap">
+              Tentar novamente
+            </button>
+          </div>
+        )}
+
         {activeTab === 'dashboard' && (
           <DashboardPage
             simulacao={simulacaoAtiva}
-            criterios={criterios}
             municipios={municipios}
             onIrParaSimulador={() => setActiveTab('simulador')}
           />
@@ -124,36 +118,30 @@ export default function App() {
             municipios={municipios}
             simulacao={simulacaoAtiva}
             onExecutar={handleExecutarTopsis}
+            onAtualizarDados={atualizarCadastros}
             carregando={carregandoSimulacao}
           />
         )}
 
-        {activeTab === 'mapa' && (
-          <MapaPage
-            simulacao={simulacaoAtiva}
-          />
-        )}
+        {activeTab === 'mapa' && <MapaPage simulacao={simulacaoAtiva} />}
 
         {activeTab === 'municipios' && (
-          <MunicipiosPage
-            municipios={municipios}
-            criterios={criterios}
-            onAtualizarDados={carregarDadosIniciais}
-          />
+          <MunicipiosPage municipios={municipios} criterios={criterios} onAtualizarDados={atualizarCadastros} />
+        )}
+
+        {activeTab === 'criterios' && (
+          <CriteriosPage criterios={criterios} onAtualizarDados={atualizarCadastros} />
         )}
 
         {activeTab === 'relatorios' && (
-          <RelatoriosPage
-            onCarregarSimulacao={handleCarregarSimulacaoHistorico}
-          />
+          <RelatoriosPage onCarregarSimulacao={handleCarregarSimulacaoHistorico} />
         )}
 
-        {activeTab === 'metodologia' && (
-          <MetodologiaPage />
-        )}
+        {activeTab === 'usuarios' && pode('admin') && <UsuariosPage />}
+
+        {activeTab === 'metodologia' && <MetodologiaPage criterios={criterios} />}
       </main>
 
-      {/* Rodapé Padronizado conforme Roteiro */}
       <footer className="bg-white border-t border-slate-200 mt-auto py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between text-xs text-slate-500 gap-3">
           <div>
@@ -166,17 +154,35 @@ export default function App() {
             <span className="text-[11px] bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-mono">
               React 18 + Vite + Node.js
             </span>
-            <a 
-              href="http://localhost:5000/api-docs" 
-              target="_blank" 
-              rel="noreferrer"
-              className="text-emerald-700 hover:underline font-semibold"
-            >
+            <a href="/api-docs" target="_blank" rel="noreferrer" className="text-emerald-700 hover:underline font-semibold">
               Swagger OpenAPI
             </a>
           </div>
         </div>
       </footer>
     </div>
+  );
+}
+
+function Raiz() {
+  const { usuario, carregando } = useAuth();
+
+  if (carregando) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" aria-label="Carregando"></div>
+      </div>
+    );
+  }
+
+  // `key` reinicia todo o estado da plataforma quando outro usuário entra
+  return usuario ? <Plataforma key={usuario.id} /> : <LoginPage />;
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <Raiz />
+    </AuthProvider>
   );
 }

@@ -1,7 +1,7 @@
 import React from 'react';
-import { BookOpen, CheckCircle, Award, Layers, Sparkles, ExternalLink } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 
-export default function MetodologiaPage() {
+export default function MetodologiaPage({ criterios = [] }) {
   return (
     <div className="space-y-8 max-w-5xl mx-auto">
       
@@ -71,7 +71,7 @@ export default function MetodologiaPage() {
               Ci = D- / (D+ + D-)  ∈ [0, 1]
             </code>
             <p className="text-xs text-slate-500">
-              D+ e D- são distâncias euclidianas. Quanto mais próximo Ci for de 1, melhor o índice da alternativa.
+              D+ e D- são distâncias euclidianas. Quanto mais próximo Ci for de 1, menor a vulnerabilidade do município.
             </p>
           </div>
 
@@ -83,6 +83,10 @@ export default function MetodologiaPage() {
         <h2 className="text-xl font-bold text-slate-900 font-serif border-b border-slate-100 pb-3">
           2. Indicadores de Vulnerabilidade Social Energética
         </h2>
+        <p className="text-xs text-slate-500">
+          Critérios e pesos padrão atualmente cadastrados na plataforma (editáveis na aba "Critérios").
+          Critérios com peso 0 ficam disponíveis no simulador, mas não influenciam o cálculo padrão.
+        </p>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
@@ -96,62 +100,25 @@ export default function MetodologiaPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              <tr>
-                <td className="py-2.5 px-3 font-bold text-slate-900">C1</td>
-                <td className="py-2.5 px-3">% domicílios sem acesso elétrico</td>
-                <td className="py-2.5 px-3"><span className="text-rose-700 font-semibold bg-rose-50 px-2 py-0.5 rounded">Custo</span></td>
-                <td className="py-2.5 px-3">%</td>
-                <td className="py-2.5 px-3">IBGE (Censo)</td>
-                <td className="py-2.5 px-3 font-mono">0.20 (20%)</td>
-              </tr>
-              <tr>
-                <td className="py-2.5 px-3 font-bold text-slate-900">C2</td>
-                <td className="py-2.5 px-3">Capacidade instalada solar fotovoltaica</td>
-                <td className="py-2.5 px-3"><span className="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded">Benefício</span></td>
-                <td className="py-2.5 px-3">kW/hab</td>
-                <td className="py-2.5 px-3">ANEEL</td>
-                <td className="py-2.5 px-3 font-mono">0.20 (20%)</td>
-              </tr>
-              <tr>
-                <td className="py-2.5 px-3 font-bold text-slate-900">C3</td>
-                <td className="py-2.5 px-3">Rendimento médio domiciliar per capita</td>
-                <td className="py-2.5 px-3"><span className="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded">Benefício</span></td>
-                <td className="py-2.5 px-3">R$</td>
-                <td className="py-2.5 px-3">IBGE</td>
-                <td className="py-2.5 px-3 font-mono">0.15 (15%)</td>
-              </tr>
-              <tr>
-                <td className="py-2.5 px-3 font-bold text-slate-900">C4</td>
-                <td className="py-2.5 px-3">Tarifa média de energia elétrica local</td>
-                <td className="py-2.5 px-3"><span className="text-rose-700 font-semibold bg-rose-50 px-2 py-0.5 rounded">Custo</span></td>
-                <td className="py-2.5 px-3">R$/kWh</td>
-                <td className="py-2.5 px-3">ANEEL</td>
-                <td className="py-2.5 px-3 font-mono">0.25 (25%)</td>
-              </tr>
-              <tr>
-                <td className="py-2.5 px-3 font-bold text-slate-900">C5</td>
-                <td className="py-2.5 px-3">Índice de radiação solar global diária</td>
-                <td className="py-2.5 px-3"><span className="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded">Benefício</span></td>
-                <td className="py-2.5 px-3">kWh/m²/dia</td>
-                <td className="py-2.5 px-3">INPE</td>
-                <td className="py-2.5 px-3 font-mono">0.20 (20%)</td>
-              </tr>
-              <tr>
-                <td className="py-2.5 px-3 font-bold text-slate-900">C6</td>
-                <td className="py-2.5 px-3">% população em situação de extrema pobreza</td>
-                <td className="py-2.5 px-3"><span className="text-rose-700 font-semibold bg-rose-50 px-2 py-0.5 rounded">Custo</span></td>
-                <td className="py-2.5 px-3">%</td>
-                <td className="py-2.5 px-3">CadÚnico / IBGE</td>
-                <td className="py-2.5 px-3 font-mono">0.00 (opcional)</td>
-              </tr>
-              <tr>
-                <td className="py-2.5 px-3 font-bold text-slate-900">C7</td>
-                <td className="py-2.5 px-3">Total de usinas renováveis cadastradas ativas</td>
-                <td className="py-2.5 px-3"><span className="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded">Benefício</span></td>
-                <td className="py-2.5 px-3">unidades</td>
-                <td className="py-2.5 px-3">ANEEL (SIGEL)</td>
-                <td className="py-2.5 px-3 font-mono">0.00 (opcional)</td>
-              </tr>
+              {criterios.map(c => (
+                <tr key={c.codigo}>
+                  <td className="py-2.5 px-3 font-bold text-slate-900">{c.codigo}</td>
+                  <td className="py-2.5 px-3">
+                    {c.nome}
+                    {c.descricao && <span className="block text-[11px] text-slate-400">{c.descricao}</span>}
+                  </td>
+                  <td className="py-2.5 px-3">
+                    {c.tipo === 'custo'
+                      ? <span className="text-rose-700 font-semibold bg-rose-50 px-2 py-0.5 rounded">Custo</span>
+                      : <span className="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded">Benefício</span>}
+                  </td>
+                  <td className="py-2.5 px-3">{c.unidade || '-'}</td>
+                  <td className="py-2.5 px-3">{c.fonte || '-'}</td>
+                  <td className="py-2.5 px-3 font-mono">
+                    {Number(c.peso).toFixed(2)} ({Math.round(Number(c.peso) * 100)}%)
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
@@ -165,15 +132,15 @@ export default function MetodologiaPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
           <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50">
             <strong className="block text-slate-900 mb-1">Eficiência de Desempenho</strong>
-            <p className="text-slate-600">Tempo de execução TOPSIS inferior a 3 segundos para matrizes de 500 alternativas (RNF01).</p>
+            <p className="text-slate-600">Tempo de resposta do cálculo TOPSIS inferior a 3 segundos para 500 alternativas (RNF01), verificado por teste automatizado.</p>
           </div>
           <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50">
             <strong className="block text-slate-900 mb-1">Segurança da Informação</strong>
-            <p className="text-slate-600">Autenticação stateless via JSON Web Token (JWT) e hashing de senhas com bcrypt (RNF04).</p>
+            <p className="text-slate-600">Autenticação via JSON Web Token (JWT), senhas com hash bcrypt e controle de acesso por perfil em todas as rotas (RNF04).</p>
           </div>
           <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50">
             <strong className="block text-slate-900 mb-1">Manutenibilidade & Testes</strong>
-            <p className="text-slate-600">Cobertura de testes automatizados superior a 80% e arquitetura modular em camadas desacopladas (RNF05).</p>
+            <p className="text-slate-600">Cobertura de testes automatizados superior a 80%, exigida na integração contínua, e arquitetura em camadas (RNF05).</p>
           </div>
         </div>
       </div>
