@@ -1,10 +1,7 @@
--- Migração 001: Schema PostgreSQL + PostGIS
--- Criação das tabelas centrais da Plataforma de Energia Renovável com TOPSIS
+-- Migration 001 (PostgreSQL): schema principal da Plataforma TOPSIS (Capítulo 6 do roteiro)
+-- A coluna geoespacial `coordenadas` (PostGIS) é criada na migration 002.
 
--- Habilita extensão PostGIS para dados geoespaciais
-CREATE EXTENSION IF NOT EXISTS postgis;
-
--- 1. Tabela de Municípios / Comunidades
+-- 1. Municípios / Comunidades
 CREATE TABLE IF NOT EXISTS municipios (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(200) NOT NULL,
@@ -13,12 +10,12 @@ CREATE TABLE IF NOT EXISTS municipios (
     idh DECIMAL(4,3),
     latitude DECIMAL(9,6) NOT NULL,
     longitude DECIMAL(9,6) NOT NULL,
-    coordenadas GEOMETRY(Point, 4326),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     CONSTRAINT uk_municipio_uf UNIQUE (nome, uf)
 );
+ALTER TABLE municipios ADD COLUMN IF NOT EXISTS codigo_ibge VARCHAR(7);
 
--- 2. Tabela de Critérios de Vulnerabilidade Social Energética
+-- 2. Critérios de Vulnerabilidade Social Energética
 CREATE TABLE IF NOT EXISTS criterios (
     id SERIAL PRIMARY KEY,
     codigo VARCHAR(10) NOT NULL UNIQUE,
@@ -30,7 +27,7 @@ CREATE TABLE IF NOT EXISTS criterios (
     fonte VARCHAR(100)
 );
 
--- 3. Tabela de Usuários e Perfis de Acesso
+-- 3. Usuários e Perfis de Acesso
 CREATE TABLE IF NOT EXISTS usuarios (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(150) NOT NULL,
@@ -68,12 +65,13 @@ CREATE TABLE IF NOT EXISTS resultados_ranking (
     coeficiente_ci DECIMAL(10,8) NOT NULL,
     distancia_positiva DECIMAL(10,8) NOT NULL,
     distancia_negativa DECIMAL(10,8) NOT NULL,
-    posicao INTEGER NOT NULL,
-    CONSTRAINT uk_simulacao_posicao UNIQUE (simulacao_id, posicao)
+    posicao INTEGER NOT NULL
 );
 
--- Índices de desempenho
+-- Índices
 CREATE INDEX IF NOT EXISTS idx_municipios_uf ON municipios(uf);
 CREATE INDEX IF NOT EXISTS idx_matriz_municipio ON matriz_decisao(municipio_id);
 CREATE INDEX IF NOT EXISTS idx_matriz_criterio ON matriz_decisao(criterio_id);
 CREATE INDEX IF NOT EXISTS idx_resultados_simulacao ON resultados_ranking(simulacao_id);
+CREATE UNIQUE INDEX IF NOT EXISTS uk_municipios_codigo_ibge ON municipios(codigo_ibge);
+CREATE UNIQUE INDEX IF NOT EXISTS uk_resultados_simulacao_municipio ON resultados_ranking(simulacao_id, municipio_id);

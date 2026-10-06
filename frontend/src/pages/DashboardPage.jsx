@@ -1,10 +1,9 @@
 import React from 'react';
-import { 
-  Building2, 
-  TrendingUp, 
-  AlertTriangle, 
-  Award, 
-  Layers, 
+import {
+  Building2,
+  TrendingUp,
+  AlertTriangle,
+  Award,
   Sparkles,
   ArrowRight
 } from 'lucide-react';
@@ -13,12 +12,13 @@ import RankingChart from '../components/RankingChart';
 import MapaLeaflet from '../components/MapaLeaflet';
 import RadarChart from '../components/RadarChart';
 import ResultsTable from '../components/ResultsTable';
+import AvisoExcluidas from '../components/AvisoExcluidas';
+import { formatarDataHora, formatarNumero } from '../utils/formato';
 
-export default function DashboardPage({ 
-  simulacao, 
-  criterios = [], 
-  municipios = [], 
-  onIrParaSimulador 
+export default function DashboardPage({
+  simulacao,
+  municipios = [],
+  onIrParaSimulador
 }) {
   const ranking = simulacao?.ranking || [];
   const resumo = simulacao?.resumoEstatistico;
@@ -52,16 +52,29 @@ export default function DashboardPage({
               <span>Configurar Nova Simulação</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
-            <div className="px-4 py-2.5 rounded-xl bg-emerald-900/40 text-emerald-200 text-xs font-medium border border-emerald-500/30 flex items-center space-x-2">
+            <div data-testid="simulacao-ativa" className="px-4 py-2.5 rounded-xl bg-emerald-900/40 text-emerald-200 text-xs font-medium border border-emerald-500/30 flex flex-wrap items-center gap-x-2">
               <span>Simulação ativa:</span>
-              <strong className="text-white">{simulacao?.titulo || 'Cenário Inicial Padrão'}</strong>
+              <strong className="text-white">{simulacao?.titulo || 'Nenhuma'}</strong>
+              {simulacao?.simulacaoId ? (
+                <span>#{simulacao.simulacaoId} • {formatarDataHora(simulacao.dataExecucao)}</span>
+              ) : simulacao ? (
+                <span>(não salva no histórico)</span>
+              ) : null}
             </div>
           </div>
         </div>
       </div>
 
+      {ranking.length === 0 && (
+        <div className="p-5 rounded-2xl border border-slate-200 bg-white text-sm text-slate-600" data-testid="sem-simulacao">
+          Ainda não há simulação para exibir. Cadastre ao menos 2 municípios com indicadores e execute o cálculo no Simulador TOPSIS.
+        </div>
+      )}
+
+      <AvisoExcluidas excluidas={simulacao?.alternativasExcluidas} />
+
       {/* Cartões KPI */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" data-testid="kpis">
         <KpiCard
           title="Municípios Avaliados"
           value={ranking.length}
@@ -72,7 +85,7 @@ export default function DashboardPage({
         />
         <KpiCard
           title="Média do Índice Ci"
-          value={resumo?.ciMedio?.toFixed(3) || '0.000'}
+          value={formatarNumero(resumo?.ciMedio, 3)}
           subtitle="Proximidade relativa média"
           icon={TrendingUp}
           color="emerald"
@@ -81,7 +94,7 @@ export default function DashboardPage({
         <KpiCard
           title="Menor Vulnerabilidade"
           value={top1 ? top1.nome : '-'}
-          subtitle={`1º Lugar (Ci = ${top1?.ci?.toFixed(4) || '-'})`}
+          subtitle={`1º Lugar (Ci = ${formatarNumero(top1?.ci, 4)})`}
           icon={Award}
           color="emerald"
           tag="Melhor Acesso"
@@ -89,7 +102,7 @@ export default function DashboardPage({
         <KpiCard
           title="Maior Vulnerabilidade"
           value={maisVulneravel ? maisVulneravel.nome : '-'}
-          subtitle={`Prioridade 1 em investimentos (Ci = ${maisVulneravel?.ci?.toFixed(4) || '-'})`}
+          subtitle={`Prioridade 1 em investimentos (Ci = ${formatarNumero(maisVulneravel?.ci, 4)})`}
           icon={AlertTriangle}
           color="rose"
           tag="Crítico"
@@ -145,7 +158,7 @@ export default function DashboardPage({
       </div>
 
       {/* Diagrama Radar Comparativo */}
-      <RadarChart criterios={criterios} ranking={ranking} />
+      <RadarChart criterios={simulacao?.criteriosInfo || []} ranking={ranking} />
 
       {/* Tabela Oficial de Resultados */}
       <ResultsTable 

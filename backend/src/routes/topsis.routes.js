@@ -1,9 +1,13 @@
 const express = require('express');
-const router = express.Router();
 const TopsisController = require('../controllers/topsis.controller');
+const asyncHandler = require('../utils/asyncHandler');
 
-router.post('/executar', TopsisController.executar);
-router.get('/simulacoes', TopsisController.historico);
-router.get('/simulacoes/:id', TopsisController.obterSimulacao);
+const router = express.Router();
+
+// UC03 — Executar TOPSIS: atores Pesquisador e Gestor (qualquer usuário autenticado)
+router.post('/executar', asyncHandler(TopsisController.executar));
+// Mantidos por compatibilidade; os caminhos do roteiro são /api/simulacoes
+router.get('/simulacoes', asyncHandler(TopsisController.historico));
+router.get('/simulacoes/:id', asyncHandler(TopsisController.obterSimulacao));
 
 module.exports = router;

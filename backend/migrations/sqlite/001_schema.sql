@@ -1,4 +1,4 @@
--- Migração SQLite: Schema de Tabelas para a Plataforma TOPSIS
+-- Migration 001 (SQLite): schema principal da Plataforma TOPSIS (Capítulo 6 do roteiro)
 CREATE TABLE IF NOT EXISTS municipios (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome TEXT NOT NULL,

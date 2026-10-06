@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Download, FileSpreadsheet, FileText, Search } from 'lucide-react';
-import { api } from '../services/api';
+import { Search } from 'lucide-react';
+import BotoesRelatorio from './BotoesRelatorio';
+import { classificar } from '../utils/vulnerabilidade';
+import { formatarNumero } from '../utils/formato';
 
 export default function ResultsTable({ ranking = [], simulacaoId, tempoExecucaoMs }) {
   const [busca, setBusca] = useState('');
@@ -21,9 +23,9 @@ export default function ResultsTable({ ranking = [], simulacaoId, tempoExecucaoM
             <h3 className="font-bold text-slate-900 text-lg font-serif">
               Classificação Oficial do Ranking TOPSIS
             </h3>
-            {tempoExecucaoMs && (
-              <span className="text-xs px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 font-mono">
-                ⏱ {tempoExecucaoMs}ms
+            {tempoExecucaoMs !== null && tempoExecucaoMs !== undefined && (
+              <span className="text-xs px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 font-mono" title="Tempo total de processamento no servidor">
+                ⏱ {tempoExecucaoMs} ms
               </span>
             )}
           </div>
@@ -45,36 +47,14 @@ export default function ResultsTable({ ranking = [], simulacaoId, tempoExecucaoM
             />
           </div>
 
-          {/* Botões de Download */}
-          {simulacaoId && (
-            <div className="flex items-center space-x-2">
-              <a
-                href={api.getRelatorioCSVUrl(simulacaoId)}
-                download
-                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200 transition-colors"
-                title="Exportar planilha CSV"
-              >
-                <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
-                <span>CSV</span>
-              </a>
-              <a
-                href={api.getRelatorioPDFUrl(simulacaoId)}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold border border-emerald-200 transition-colors"
-                title="Exportar relatório em PDF"
-              >
-                <FileText className="w-3.5 h-3.5 text-emerald-600" />
-                <span>PDF</span>
-              </a>
-            </div>
-          )}
+          {/* Exportação (apenas para simulações salvas no histórico) */}
+          <BotoesRelatorio simulacaoId={simulacaoId} />
         </div>
       </div>
 
       {/* Tabela de Resultados */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse text-xs">
+        <table className="w-full text-left border-collapse text-xs" data-testid="tabela-ranking">
           <thead>
             <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-600 uppercase font-semibold tracking-wider text-[11px]">
               <th className="py-3 px-4 w-14 text-center">Pos</th>
@@ -89,15 +69,11 @@ export default function ResultsTable({ ranking = [], simulacaoId, tempoExecucaoM
           </thead>
           <tbody className="divide-y divide-slate-100">
             {filtrados.map((item) => {
-              let badgeEstilo = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-              if (item.ci < 0.40) {
-                badgeEstilo = 'bg-rose-50 text-rose-700 border-rose-200';
-              } else if (item.ci < 0.70) {
-                badgeEstilo = 'bg-amber-50 text-amber-700 border-amber-200';
-              }
+              const faixa = classificar(item.ci);
+              const badgeEstilo = faixa.badge;
 
               return (
-                <tr key={item.municipioId} className="hover:bg-slate-50/60 transition-colors">
+                <tr key={item.municipioId} data-testid="linha-ranking" className="hover:bg-slate-50/60 transition-colors">
                   <td className="py-3 px-4 text-center">
                     <span className="w-6 h-6 rounded-md bg-slate-100 font-bold text-slate-800 inline-flex items-center justify-center text-xs">
                       #{item.posicao}
@@ -112,10 +88,10 @@ export default function ResultsTable({ ranking = [], simulacaoId, tempoExecucaoM
                     </div>
                   </td>
                   <td className="py-3 px-4 text-slate-600 font-medium">
-                    {item.populacao ? item.populacao.toLocaleString('pt-BR') : '-'}
+                    {formatarNumero(item.populacao)}
                   </td>
                   <td className="py-3 px-4 text-slate-600 font-medium">
-                    {item.idh ? item.idh.toFixed(3) : '-'}
+                    {formatarNumero(item.idh, 3)}
                   </td>
                   <td className="py-3 px-4 font-mono text-slate-500">
                     {item.distanciaPositiva?.toFixed(4)}
@@ -130,7 +106,7 @@ export default function ResultsTable({ ranking = [], simulacaoId, tempoExecucaoM
                   </td>
                   <td className="py-3 px-4">
                     <span className={`inline-flex items-center px-2.5 py-1 rounded-full font-semibold text-[11px] border ${badgeEstilo}`}>
-                      {item.nivelVulnerabilidade}
+                      {item.nivelVulnerabilidade || faixa.nivel}
                     </span>
                   </td>
                 </tr>

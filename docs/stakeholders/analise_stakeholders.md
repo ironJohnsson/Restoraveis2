@@ -18,16 +18,20 @@
 
 ## 2. Matriz Poder x Interesse
 
+Posicionamento conforme os graus de poder e de interesse da tabela acima (todos os envolvidos têm alto interesse no resultado):
+
 ```
       Alto Poder
           ▲
-          │   [Professor Orientador]       [Gestor Público]
-          │   (Satisfazer / Validar)       (Gerenciar de Perto)
+          │                              [Gestor Público]
+          │                              [Professor Orientador]
+          │                              [Equipe de Desenvolvimento]
+          │   (Manter satisfeito)        (Gerenciar de perto)
+          │ - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+          │                              [Pesquisador / Especialista]   ← poder médio
           │
-          │
-          │   [Equipe de Dev]              [Pesquisador / Especialista]
-          │   (Parceria Operacional)       [Comunidade Beneficiária]
-          │                                (Manter Informados)
+          │                              [Comunidade Vulnerável]
+          │   (Monitorar)                (Manter informado)
           └────────────────────────────────────────────────────────►
          Baixo Interesse                                Alto Interesse
 ```
@@ -38,4 +42,4 @@
 
 1. **Revisões de Sprint (Quinzenais):** Demonstração do incremento de software funcional com avaliação do orientador e gestores convidados.
 2. **Registro de Problemas e Sugestões:** Canal centralizado via repositório de código (Issues e PRs) com rastreabilidade direta aos requisitos funcionais.
-3. **Métricas de Adoção:** Avaliação de facilidade de uso pelos pesquisadores através do tempo decorrido para configurar e executar a primeira simulação (< 5 minutos, meta RNF02).
+3. **Métricas de Adoção:** Avaliação de facilidade de uso pelos pesquisadores através do tempo decorrido para configurar e executar a primeira simulação (< 5 minutos, meta de usabilidade da ISO/IEC 25010).

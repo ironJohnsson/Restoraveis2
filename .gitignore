@@ -4,11 +4,16 @@ dist/
 build/
 .cache/
 
-# Banco de dados local
-backend/data/*.sqlite
-backend/data/*.sqlite-journal
+# Dados locais do backend (banco SQLite e segredo do JWT)
+backend/data/
 *.sqlite
 *.sqlite3
+*.sqlite-journal
+
+# Relatórios de testes
+coverage/
+frontend/test-results/
+frontend/playwright-report/
 
 # Logs e variáveis de ambiente
 *.log

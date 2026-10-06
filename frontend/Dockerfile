@@ -1,14 +1,14 @@
-# Estágio 1: Build da aplicação React
+# Estágio 1: build da aplicação React
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 COPY package*.json ./
-RUN npm install --no-audit --no-fund
+RUN npm ci --no-audit --no-fund
 
 COPY . .
 RUN npm run build
 
-# Estágio 2: Servidor Nginx de Alta Performance
+# Estágio 2: Nginx servindo os arquivos estáticos e encaminhando /api para o backend
 FROM nginx:alpine
 
 COPY --from=builder /app/dist /usr/share/nginx/html

@@ -1,125 +1,90 @@
-const initSqlJs = require('sql.js');
-const fs = require('fs');
-const path = require('path');
 const config = require('../config/config');
-
-let dbInstance = null;
-let SQL = null;
-
-const dataDir = path.dirname(config.dbPath);
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
-}
+const { migrar } = require('./migrate');
+const { semear, repararHashLegado } = require('./seed');
 
 /**
- * Inicializa a conexão com o banco SQLite (via WebAssembly sql.js)
- * Executa as migrações e seeds caso o arquivo de banco ainda não exista.
+ * Fachada de acesso ao banco relacional.
+ *
+ * - Sem DATABASE_URL: SQLite local (sql.js), ideal para desenvolvimento e testes.
+ * - Com DATABASE_URL: PostgreSQL + PostGIS (implantação via Docker Compose).
+ *
+ * Todo o SQL do projeto é escrito no subconjunto comum aos dois bancos, com
+ * marcadores `?`. Os models recebem um executor `q` (esta fachada ou uma transação).
  */
-async function getDb() {
-  if (dbInstance) {
-    return dbInstance;
+const TABELAS = ['resultados_ranking', 'simulacoes', 'matriz_decisao', 'municipios', 'criterios', 'usuarios'];
+
+let adapter = null;
+let inicializacao = null;
+
+function criarAdapter() {
+  if (config.databaseUrl) {
+    const PostgresAdapter = require('./adapters/postgres');
+    return new PostgresAdapter(config.databaseUrl);
   }
-
-  if (!SQL) {
-    SQL = await initSqlJs();
-  }
-
-  const dbFileExists = fs.existsSync(config.dbPath);
-
-  if (dbFileExists) {
-    const fileBuffer = fs.readFileSync(config.dbPath);
-    dbInstance = new SQL.Database(fileBuffer);
-  } else {
-    dbInstance = new SQL.Database();
-    // Executa schema e seeds
-    const schemaPath = path.join(__dirname, '../../migrations/001_schema_sqlite.sql');
-    const seedsPath = path.join(__dirname, '../../migrations/002_seeds.sql');
-
-    if (fs.existsSync(schemaPath)) {
-      const schemaSql = fs.readFileSync(schemaPath, 'utf8');
-      dbInstance.run(schemaSql);
-    }
-
-    if (fs.existsSync(seedsPath)) {
-      const seedsSql = fs.readFileSync(seedsPath, 'utf8');
-      dbInstance.run(seedsSql);
-    }
-
-    save();
-  }
-
-  return dbInstance;
+  const SqliteAdapter = require('./adapters/sqlite');
+  return new SqliteAdapter(config.dbPath);
 }
 
-/**
- * Salva o estado atual do banco no arquivo SQLite em disco
- */
-function save() {
-  if (!dbInstance) return;
-  try {
-    const data = dbInstance.export();
-    const buffer = Buffer.from(data);
-    fs.writeFileSync(config.dbPath, buffer);
-  } catch (err) {
-    console.error('Erro ao persistir banco SQLite em disco:', err);
+/** Conecta, aplica as migrations pendentes e carrega os dados iniciais em um banco vazio. */
+function init({ log } = {}) {
+  if (!inicializacao) {
+    inicializacao = (async () => {
+      adapter = criarAdapter();
+      await adapter.conectar();
+      await migrar(adapter, { log });
+      await adapter.transaction(async (tx) => {
+        await semear(tx);
+        await repararHashLegado(tx);
+      });
+      return adapter;
+    })().catch((err) => {
+      inicializacao = null;
+      throw err;
+    });
   }
+  return inicializacao;
 }
 
-/**
- * Executa uma consulta e retorna todas as linhas como array de objetos
- */
 async function all(sql, params = []) {
-  const db = await getDb();
-  const stmt = db.prepare(sql);
-  stmt.bind(params);
-
-  const rows = [];
-  while (stmt.step()) {
-    rows.push(stmt.getAsObject());
-  }
-  stmt.free();
-  return rows;
+  return (await init()).all(sql, params);
 }
 
-/**
- * Executa uma consulta e retorna a primeira linha ou null
- */
 async function get(sql, params = []) {
-  const rows = await all(sql, params);
-  return rows.length > 0 ? rows[0] : null;
+  return (await init()).get(sql, params);
 }
 
-/**
- * Executa comando DML (INSERT, UPDATE, DELETE) e persiste em disco
- */
 async function run(sql, params = []) {
-  const db = await getDb();
-  db.run(sql, params);
-  save();
-
-  const lastIdRes = db.exec("SELECT last_insert_rowid() AS id;");
-  const lastInsertRowid = lastIdRes.length > 0 && lastIdRes[0].values.length > 0 ? lastIdRes[0].values[0][0] : null;
-
-  const changesRes = db.exec("SELECT changes() AS ch;");
-  const changes = changesRes.length > 0 && changesRes[0].values.length > 0 ? changesRes[0].values[0][0] : 0;
-
-  return { lastInsertRowid, changes };
+  return (await init()).run(sql, params);
 }
 
-/**
- * Executa múltiplos comandos SQL em lote
- */
-async function exec(sql) {
-  const db = await getDb();
-  db.run(sql);
-  save();
+async function transaction(fn) {
+  return (await init()).transaction(fn);
+}
+
+/** Apaga todos os dados e recarrega os seeds. Usado pelos testes automatizados. */
+async function reset() {
+  const ativo = await init();
+  await ativo.truncar(TABELAS);
+  await ativo.transaction(tx => semear(tx, { forcar: true }));
+}
+
+async function close() {
+  if (!inicializacao) return;
+  const ativo = await inicializacao.catch(() => null);
+  inicializacao = null;
+  adapter = null;
+  if (ativo) await ativo.fechar();
 }
 
 module.exports = {
-  getDb,
+  init,
   all,
   get,
   run,
-  exec,
-  save
+  transaction,
+  reset,
+  close,
+  get dialect() {
+    return adapter ? adapter.dialect : null;
+  }
 };

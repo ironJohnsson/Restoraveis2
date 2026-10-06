@@ -1,4 +1,5 @@
 import React from 'react';
+import { classificar } from '../utils/vulnerabilidade';
 
 export default function RankingChart({ ranking = [] }) {
   if (!ranking || ranking.length === 0) {
@@ -9,43 +10,35 @@ export default function RankingChart({ ranking = [] }) {
     );
   }
 
-  // Limita às 10 primeiras para foco visual ou exibe todas com barra de rolagem
   const maxCi = Math.max(...ranking.map(r => r.ci), 1.0);
 
   return (
     <div className="space-y-3">
       {ranking.map((item) => {
         const percentual = (item.ci / maxCi) * 100;
-        let barColor = 'bg-emerald-500';
-        let badgeBg = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-
-        if (item.ci < 0.40) {
-          barColor = 'bg-rose-500';
-          badgeBg = 'bg-rose-50 text-rose-700 border-rose-200';
-        } else if (item.ci < 0.70) {
-          barColor = 'bg-amber-500';
-          badgeBg = 'bg-amber-50 text-amber-700 border-amber-200';
-        }
+        const faixa = classificar(item.ci);
+        const barColor = faixa.barra;
+        const badgeBg = faixa.badge;
 
         return (
-          <div key={item.municipioId || item.nome} className="group p-2.5 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
-            <div className="flex items-center justify-between text-xs mb-1.5">
-              <div className="flex items-center space-x-2">
-                <span className="w-5 h-5 rounded-md bg-slate-100 font-bold text-slate-700 flex items-center justify-center text-[11px]">
+          <div key={item.municipioId} data-testid="ranking-item" className="group p-2.5 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+            <div className="flex items-center justify-between gap-2 text-xs mb-1.5">
+              <div className="flex items-center space-x-2 min-w-0">
+                <span className="min-w-5 h-5 px-1 shrink-0 rounded-md bg-slate-100 font-bold text-slate-700 flex items-center justify-center text-[11px]">
                   #{item.posicao}
                 </span>
-                <span className="font-semibold text-slate-900">
+                <span className="font-semibold text-slate-900 truncate" title={item.nome}>
                   {item.nome}
                 </span>
-                <span className="text-slate-400 font-normal">
+                <span className="text-slate-400 font-normal shrink-0">
                   ({item.uf})
                 </span>
               </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-slate-400 text-[11px]">
+              <div className="flex items-center space-x-2 shrink-0">
+                <span className="hidden sm:inline text-slate-400 text-[11px] whitespace-nowrap">
                   D+: {item.distanciaPositiva?.toFixed(3)} | D-: {item.distanciaNegativa?.toFixed(3)}
                 </span>
-                <span className={`px-2 py-0.5 rounded-md font-mono font-bold text-xs border ${badgeBg}`}>
+                <span className={`px-2 py-0.5 rounded-md font-mono font-bold text-xs border whitespace-nowrap ${badgeBg}`}>
                   Ci = {item.ci?.toFixed(4)}
                 </span>
               </div>

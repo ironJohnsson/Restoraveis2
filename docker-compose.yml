@@ -1,40 +1,47 @@
-version: '3.8'
-
+# Plataforma de Energia Renovável com TOPSIS — implantação em 1 comando:
+#
+#   docker compose up -d --build
+#
+#   Interface web ....... http://localhost:3000
+#   API ................. http://localhost:5000  (também em http://localhost:3000/api)
+#   Swagger ............. http://localhost:5000/api-docs
+#
+# Opcional: copie .env.example para .env para definir senhas e o segredo do JWT.
 services:
-  # 1. Banco de Dados PostgreSQL + Extensão PostGIS
+  # 1. Banco de Dados PostgreSQL + extensão PostGIS (acessível apenas pela rede interna)
   db:
     image: postgis/postgis:16-3.4-alpine
-    container_name: topsis-postgis
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_DB: topsis_db
       POSTGRES_USER: topsis_user
-      POSTGRES_PASSWORD: topsis_password
-    ports:
-      - "5432:5432"
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-topsis_password}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./backend/migrations/001_schema_postgres.sql:/docker-entrypoint-initdb.d/01_schema.sql
     networks:
       - topsis-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U topsis_user -d topsis_db"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 20
 
-  # 2. Backend API RESTful e Motor TOPSIS
+  # 2. Backend: API RESTful e motor TOPSIS. Aplica as migrations e os dados iniciais ao subir.
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
-    container_name: topsis-backend
-    restart: always
+    restart: unless-stopped
     environment:
       PORT: 5000
       NODE_ENV: production
-      JWT_SECRET: plataforma-topsis-segredo-super-seguro-2026
-      DATABASE_URL: postgres://topsis_user:topsis_password@db:5432/topsis_db
+      DATABASE_URL: postgres://topsis_user:${POSTGRES_PASSWORD:-topsis_password}@db:5432/topsis_db
+      # Vazio = segredo aleatório gerado na primeira execução e guardado no volume backend_data
+      JWT_SECRET: ${JWT_SECRET:-}
+      SEED_SENHA_PADRAO: ${SEED_SENHA_PADRAO:-123456}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      TRUST_PROXY: 1
+    volumes:
+      - backend_data:/app/data
     ports:
       - "5000:5000"
     depends_on:
@@ -43,17 +50,16 @@ services:
     networks:
       - topsis-network
 
-  # 3. Frontend SPA (React + Vite + TailwindCSS servido por Nginx)
+  # 3. Frontend: SPA React servida por Nginx, que também encaminha /api para o backend
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
-    container_name: topsis-frontend
-    restart: always
+    restart: unless-stopped
     ports:
       - "3000:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     networks:
       - topsis-network
 
@@ -63,4 +69,4 @@ networks:
 
 volumes:
   postgres_data:
-    driver: local
+  backend_data:

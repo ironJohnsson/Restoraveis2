@@ -1,117 +1,61 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const db = require('../database/db');
 const config = require('../config/config');
+const Usuario = require('../models/usuario.model');
+const HttpError = require('../utils/HttpError');
+const v = require('../utils/validacao');
+
+// Comparado quando o e-mail não existe, para que o tempo de resposta não revele quais contas existem
+const HASH_FICTICIO = bcrypt.hashSync('senha-inexistente', config.bcryptRounds);
 
 class AuthController {
-  static async login(req, res, next) {
-    try {
-      const { email, senha } = req.body;
-
-      if (!email || !senha) {
-        return res.status(400).json({
-          sucesso: false,
-          mensagem: 'Email e senha são obrigatórios'
-        });
-      }
-
-      const usuario = await db.get('SELECT * FROM usuarios WHERE email = ?', [email]);
-      if (!usuario) {
-        return res.status(401).json({
-          sucesso: false,
-          mensagem: 'Credenciais inválidas: usuário não encontrado'
-        });
-      }
-
-      // Validação de senha por hash bcrypt
-      // Caso a senha seja a padrão em texto claro durante testes, aceita fallback seguro
-      let senhaValida = false;
-      try {
-        senhaValida = bcrypt.compareSync(senha, usuario.senha_hash);
-      } catch (e) {
-        senhaValida = false;
-      }
-
-      if (!senhaValida && senha === '123456') {
-        senhaValida = true;
-      }
-
-      if (!senhaValida) {
-        return res.status(401).json({
-          sucesso: false,
-          mensagem: 'Credenciais inválidas: senha incorreta'
-        });
-      }
-
-      const payload = {
-        id: usuario.id,
-        nome: usuario.nome,
-        email: usuario.email,
-        perfil: usuario.perfil
-      };
-
-      const token = jwt.sign(payload, config.jwtSecret, {
-        expiresIn: config.jwtExpiresIn
-      });
-
-      return res.status(200).json({
-        sucesso: true,
-        mensagem: 'Login realizado com sucesso',
-        token,
-        usuario: payload
-      });
-    } catch (err) {
-      next(err);
+  static async login(req, res) {
+    const { email, senha } = req.body || {};
+    if (typeof email !== 'string' || typeof senha !== 'string' || !email.trim() || !senha) {
+      throw new HttpError(400, 'Email e senha são obrigatórios');
     }
+
+    const usuario = await Usuario.buscarComSenhaPorEmail(email.trim());
+    const senhaValida = await bcrypt.compare(senha, usuario ? usuario.senha_hash : HASH_FICTICIO);
+    if (!usuario || !senhaValida) {
+      throw new HttpError(401, 'Credenciais inválidas');
+    }
+
+    const payload = {
+      id: usuario.id,
+      nome: usuario.nome,
+      email: usuario.email,
+      perfil: usuario.perfil
+    };
+    const token = jwt.sign(payload, config.jwtSecret, { expiresIn: config.jwtExpiresIn });
+
+    res.status(200).json({
+      sucesso: true,
+      mensagem: 'Login realizado com sucesso',
+      token,
+      usuario: payload
+    });
   }
 
-  static async me(req, res, next) {
-    try {
-      const usuario = await db.get('SELECT id, nome, email, perfil, created_at FROM usuarios WHERE id = ?', [req.usuario.id]);
-      if (!usuario) {
-        return res.status(404).json({ sucesso: false, mensagem: 'Usuário não encontrado' });
-      }
-      return res.status(200).json({ sucesso: true, usuario });
-    } catch (err) {
-      next(err);
-    }
+  static async me(req, res) {
+    res.status(200).json({ sucesso: true, usuario: req.usuario });
   }
 
-  static async register(req, res, next) {
-    try {
-      const { nome, email, senha, perfil = 'pesquisador' } = req.body;
-
-      if (!nome || !email || !senha) {
-        return res.status(400).json({
-          sucesso: false,
-          mensagem: 'Nome, email e senha são obrigatórios'
-        });
-      }
-
-      const existente = await db.get('SELECT id FROM usuarios WHERE email = ?', [email]);
-      if (existente) {
-        return res.status(409).json({
-          sucesso: false,
-          mensagem: 'Email já cadastrado no sistema'
-        });
-      }
-
-      const salt = bcrypt.genSaltSync(10);
-      const hash = bcrypt.hashSync(senha, salt);
-
-      const result = await db.run(
-        'INSERT INTO usuarios (nome, email, senha_hash, perfil) VALUES (?, ?, ?, ?)',
-        [nome, email, hash, perfil]
-      );
-
-      return res.status(201).json({
-        sucesso: true,
-        mensagem: 'Usuário cadastrado com sucesso',
-        usuarioId: result.lastInsertRowid
-      });
-    } catch (err) {
-      next(err);
+  /** Troca da própria senha: exige a senha atual. */
+  static async alterarSenha(req, res) {
+    const { senhaAtual, novaSenha } = req.body || {};
+    if (typeof senhaAtual !== 'string' || !senhaAtual) {
+      throw new HttpError(400, "O campo 'senhaAtual' é obrigatório");
     }
+    v.senha(novaSenha, 'novaSenha');
+
+    const usuario = await Usuario.buscarComSenhaPorId(req.usuario.id);
+    if (!(await bcrypt.compare(senhaAtual, usuario.senha_hash))) {
+      throw new HttpError(401, 'Senha atual incorreta');
+    }
+
+    await Usuario.atualizar(usuario.id, { senhaHash: await bcrypt.hash(novaSenha, config.bcryptRounds) });
+    res.status(200).json({ sucesso: true, mensagem: 'Senha alterada com sucesso' });
   }
 }
 
