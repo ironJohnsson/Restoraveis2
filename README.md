@@ -8,6 +8,7 @@
 [![Docker Compose](https://img.shields.io/badge/Deploy-Docker%20Compose-2496ED.svg)](docker-compose.yml)
 
 > **Roteiro elaborado por:** Prof. Me. Celso Barreto com base nas normas ISO/IEC 12207, 15504 e 25010.
+> **Equipe composta por:** Juliana Barretto, Matheus Johnsson, Pedro Artur e Victor Barreto
 > **Referência:** [Roteiro e Templates do Projeto TOPSIS](https://senaiba.my.canva.site/roteiro1) — transcrição em [docs/referencias/roteiro.txt](docs/referencias/roteiro.txt)
 
 ---
